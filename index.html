@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>通勤記錄</title>
+<style>
+  :root {
+    --navy:   #1A2F5E;
+    --blue:   #0066CC;
+    --teal:   #00A8B5;
+    --green:  #16A34A;
+    --amber:  #D97706;
+    --red:    #DC2626;
+    --gray:   #64748B;
+    --light:  #F4F7FB;
+    --white:  #FFFFFF;
+    --border: #E2E8F0;
+    --text:   #1E293B;
+    --sub:    #94A3B8;
+
+    --hsr:    #E8530A;   /* 高鐵橘 */
+    --taxi:   #F5C518;   /* 計程車黃 */
+    --car:    #2563EB;   /* 私家車藍 */
+    --govt:   #16A34A;   /* 公務車綠 */
+
+    --r: 14px;
+    --safe-bottom: env(safe-area-inset-bottom, 20px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, 'PingFang TC', sans-serif;
+    background: var(--light);
+    color: var(--text);
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  /* ── TOP NAV ── */
+  .topbar {
+    background: var(--navy);
+    color: #fff;
+    padding: 52px 20px 16px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .topbar h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .topbar .sub { font-size: 12px; color: var(--teal); margin-top: 2px; }
+  .topbar-right { text-align: right; }
+  .stat-box { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px 12px; }
+  .stat-num { font-size: 20px; font-weight: 800; color: var(--teal); }
+  .stat-label { font-size: 10px; color: rgba(255,255,255,0.6); }
+
+  /* ── TABS ── */
+  .tab-bar {
+    background: var(--white);
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 4px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--gray);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all .2s;
+    font-weight: 500;
+  }
+  .tab.active { color: var(--navy); border-bottom-color: var(--blue); }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── ADD FORM ── */
+  .form-wrap { padding: 16px; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 20px 0 8px;
+  }
+  .card {
+    background: var(--white);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .field {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    gap: 10px;
+  }
+  .field:last-child { border-bottom: none; }
+  .field label { font-size: 14px; color: var(--text); min-width: 68px; flex-shrink: 0; }
+  .field input, .field select, .field textarea {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: var(--text);
+    background: transparent;
+    font-family: inherit;
+    text-align: right;
+  }
+  .field textarea { text-align: left; resize: none; height: 60px; }
+  input[type="date"], input[type="time"] { text-align: right; }
+
+  /* ── MODE PICKER ── */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .mode-btn {
+    border: 2px solid var(--border);
+    border-radius: var(--r);
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s;
+    background: var(--white);
+  }
+  .mode-btn .icon { font-size: 26px; margin-bottom: 6px; }
+  .mode-btn .name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .mode-btn .detail { font-size: 10px; color: var(--sub); margin-top: 2px; }
+  .mode-btn.sel-hsr       { border-color: var(--hsr);  background: #FFF3EE; }
+  .mode-btn.sel-hsr-taxi  { border-color: var(--taxi); background: #FFFBEB; }
+  .mode-btn.sel-car       { border-color: var(--car);  background: #EFF6FF; }
+  .mode-btn.sel-govt      { border-color: var(--govt); background: #F0FDF4; }
+
+  /* ── RECEIPT UPLOAD ── */
+  .receipt-area {
+    border: 1.5px dashed var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    text-align: center;
+    background: var(--white);
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .receipt-area.has-file { border-color: var(--blue); border-style: solid; }
+  .receipt-area .icon { font-size: 28px; }
+  .receipt-area p { font-size: 13px; color: var(--gray); margin-top: 6px; }
+  .receipt-area strong { display: block; font-size: 13px; color: var(--blue); margin-top: 4px; }
+  #receiptInput { display: none; }
+
+  /* thumbnails */
+  .thumb-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .thumb {
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    position: relative;
+    display: inline-block;
+  }
+  .thumb-wrap { position: relative; display: inline-block; }
+  .thumb-del {
+    position: absolute; top: -6px; right: -6px;
+    background: var(--red); color: #fff;
+    border-radius: 50%; width: 18px; height: 18px;
+    font-size: 11px; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; border: none;
+    line-height: 1;
+  }
+
+  /* ── SUBMIT BTN ── */
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--r);
+    margin-top: 24px;
+    margin-bottom: calc(16px + var(--safe-bottom));
+    cursor: pointer;
+    letter-spacing: 0.3px;
+  }
+  .btn-submit:active { opacity: .85; }
+
+  /* ── RECORDS LIST ── */
+  .records-wrap { padding: 16px; }
+
+  /* filter bar */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    margin-bottom: 14px;
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    white-space: nowrap;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--gray);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .filter-chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+  /* record card */
+  .rec-card {
+    background: var(--white);
+    border-radius: var(--r);
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    cursor: pointer;
+  }
+  .rec-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .rec-badge {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .rec-badge.hsr      { background: #FFF3EE; }
+  .rec-badge.hsr-taxi { background: #FFFBEB; }
+  .rec-badge.car      { background: #EFF6FF; }
+  .rec-badge.govt     { background: #F0FDF4; }
+
+  .rec-info { flex: 1; }
+  .rec-date { font-size: 13px; font-weight: 700; color: var(--text); }
+  .rec-mode { font-size: 12px; color: var(--gray); margin-top: 1px; }
+  .rec-right { text-align: right; }
+  .rec-receipt { font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
+  .rec-receipt.has { background: #DCFCE7; color: var(--green); }
+  .rec-receipt.none { background: #F1F5F9; color: var(--sub); }
+  .rec-note { font-size: 12px; color: var(--gray); margin-top: 4px; }
+
+  .rec-body {
+    border-top: 1px solid var(--border);
+    padding: 10px 14px;
+    display: none;
+  }
+  .rec-body.open { display: block; }
+  .rec-body-row {
+    display: flex; justify-content: space-between;
+    font-size: 13px; padding: 4px 0;
+    border-bottom: 1px solid #F8FAFC;
+  }
+  .rec-body-row:last-child { border-bottom: none; }
+  .rec-body-row .k { color: var(--gray); }
+  .rec-body-row .v { font-weight: 600; color: var(--text); }
+  .rec-thumbs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .rec-thumbs img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+
+  .rec-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .rec-del {
+    flex: 1; padding: 9px; border: 1.5px solid #FECACA;
+    border-radius: 8px; background: #FFF5F5; color: var(--red);
+    font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+
+  /* empty state */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--sub);
+  }
+  .empty .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty p { font-size: 14px; }
+
+  /* ── STATS PAGE ── */
+  .stats-wrap { padding: 16px; }
+  .stats-month-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .month-nav { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-size: 15px; font-weight: 700; color: var(--navy); }
+  .month-arrow { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; cursor: pointer; font-size: 16px; color: var(--navy); }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-card {
+    background: var(--white); border-radius: var(--r);
+    padding: 14px 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .stat-card .num { font-size: 28px; font-weight: 800; }
+  .stat-card .lbl { font-size: 11px; color: var(--sub); margin-top: 2px; }
+  .stat-card.full { grid-column: 1 / -1; }
+
+  .breakdown-card { background: var(--white); border-radius: var(--r); padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); margin-bottom: 10px; }
+  .breakdown-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+  .breakdown-row { margin-bottom: 10px; }
+  .breakdown-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+  .breakdown-label .name { color: var(--text); font-weight: 500; }
+  .breakdown-label .cnt { color: var(--gray); }
+  .breakdown-bar { height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; }
+  .breakdown-fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
+
+  /* ── EXPORT ── */
+  .export-wrap { padding: 16px; }
+  .export-card { background: var(--white); border-radius: var(--r); padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.06); margin-bottom: 12px; }
+  .export-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .export-sub { font-size: 12px; color: var(--sub); margin-bottom: 12px; }
+  .btn-export {
+    width: 100%; padding: 13px;
+    background: var(--navy); color: #fff;
+    font-size: 14px; font-weight: 600;
+    border: none; border-radius: 10px;
+    cursor: pointer; margin-top: 6px;
+  }
+  .btn-export.outline {
+    background: transparent; color: var(--navy);
+    border: 1.5px solid var(--navy); margin-top: 8px;
+  }
+
+  /* toast */
+  .toast {
+    position: fixed; bottom: calc(80px + var(--safe-bottom));
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #1E293B; color: #fff;
+    padding: 10px 20px; border-radius: 20px;
+    font-size: 13px; font-weight: 500;
+    opacity: 0; transition: all .3s;
+    white-space: nowrap; z-index: 999;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: var(--safe-bottom);
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1; padding: 10px 4px 6px;
+    text-align: center; cursor: pointer;
+    color: var(--sub); font-size: 10px;
+    transition: color .15s;
+  }
+  .nav-item .ni { font-size: 22px; display: block; line-height: 1.2; }
+  .nav-item.active { color: var(--blue); }
+
+  .page-content {
+    padding-bottom: calc(70px + var(--safe-bottom));
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="sub">CosX Solution</div>
+    <h1>通勤記錄</h1>
+  </div>
+  <div class="topbar-right">
+    <div class="stat-box">
+      <div class="stat-num" id="topCount">0</div>
+      <div class="stat-label">本月筆數</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGES -->
+<div class="page-content">
+
+  <!-- ── PAGE: ADD ── -->
+  <div class="page active" id="page-add">
+    <div class="form-wrap">
+      <div class="section-label">通勤日期與時間</div>
+      <div class="card">
+        <div class="field">
+          <label>日期</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="field">
+          <label>上班 / 下班</label>
+          <select id="f-direction">
+            <option value="上班">上班</option>
+            <option value="下班">下班</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-label">通勤方式</div>
+      <div class="mode-grid">
+        <div class="mode-btn" data-mode="hsr" onclick="selectMode('hsr')">
+          <div class="icon">🚄</div>
+          <div class="name">高鐵</div>
+          <div class="detail">需電子票據</div>
+        </div>
+        <div class="mode-btn" data-mode="hsr-taxi" onclick="selectMode('hsr-taxi')">
+          <div class="icon">🚄🚕</div>
+          <div class="name">高鐵＋計程車</div>
+          <div class="detail">需電子票據</div>
+        </div>
+        <div class="mode-btn" data-mode="car" onclick="selectMode('car')">
+          <div class="icon">🚗</div>
+          <div class="name">私家車</div>
+          <div class="detail">需加油發票</div>
+        </div>
+        <div class="mode-btn" data-mode="govt" onclick="selectMode('govt')">
+          <div class="icon">🚐</div>
+          <div class="name">公務車</div>
+          <div class="detail">無需報帳</div>
+        </div>
+      </div>
+
+      <!-- Receipt section (hidden for govt) -->
+      <div id="receiptSection">
+        <div class="section-label" id="receiptLabel">上傳票據</div>
+        <div class="receipt-area" id="receiptArea" onclick="document.getElementById('receiptInput').click()">
+          <div class="icon">📎</div>
+          <p id="receiptHint">點擊上傳電子票據或發票</p>
+          <strong id="receiptCount" style="display:none"></strong>
+        </div>
+        <input type="file" id="receiptInput" accept="image/*" multiple capture="environment"
+               onchange="handleReceipts(this)">
+        <div class="thumb-row" id="thumbRow"></div>
+      </div>
+
+      <div class="section-label">備註（選填）</div>
+      <div class="card">
+        <div class="field">
+          <textarea id="f-note" placeholder="例：出差台北、加油金額..."></textarea>
+        </div>
+      </div>
+
+      <button class="btn-submit" onclick="saveRecord()">✅ 儲存記錄</button>
+    </div>
+  </div>
+
+  <!-- ── PAGE: RECORDS ── -->
+  <div class="page" id="page-records">
+    <div class="records-wrap">
+      <div class="filter-row" id="filterRow">
+        <div class="filter-chip active" data-filter="all" onclick="setFilter('all',this)">全部</div>
+        <div class="filter-chip" data-filter="hsr" onclick="setFilter('hsr',this)">🚄 高鐵</div>
+        <div class="filter-chip" data-filter="hsr-taxi" onclick="setFilter('hsr-taxi',this)">🚄🚕 高鐵＋計程車</div>
+        <div class="filter-chip" data-filter="car" onclick="setFilter('car',this)">🚗 私家車</div>
+        <div class="filter-chip" data-filter="govt" onclick="setFilter('govt',this)">🚐 公務車</div>
+        <div class="filter-chip" data-filter="needs-receipt" onclick="setFilter('needs-receipt',this)">📎 有票據</div>
+      </div>
+      <div id="recordList"></div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: STATS ── -->
+  <div class="page" id="page-stats">
+    <div class="stats-wrap">
+      <div class="stats-month-row">
+        <button class="month-arrow" onclick="changeMonth(-1)">◀</button>
+        <div class="month-nav" id="monthLabel"></div>
+        <button class="month-arrow" onclick="changeMonth(1)">▶</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="num" id="s-total" style="color:var(--blue)">0</div>
+          <div class="lbl">本月記錄總筆數</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="s-needs" style="color:var(--amber)">0</div>
+          <div class="lbl">需報帳筆數</div>
+        </div>
+        <div class="stat-card full">
+          <div class="num" id="s-receipt" style="color:var(--green)">0 <span style="font-size:14px;font-weight:500;color:var(--sub)">/ <span id="s-receipt-total">0</span> 有票據</span></div>
+          <div class="lbl">有票據紀錄 / 需票據總數</div>
+        </div>
+      </div>
+
+      <div class="breakdown-card">
+        <div class="breakdown-title">通勤方式分佈</div>
+        <div id="breakdownChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PAGE: EXPORT ── -->
+  <div class="page" id="page-export">
+    <div class="export-wrap">
+      <div class="section-label">匯出報表</div>
+      <div class="export-card">
+        <div class="export-title">📋 CSV 報表</div>
+        <div class="export-sub">匯出所有記錄為 CSV 格式，可貼入 Excel 或 Numbers</div>
+        <button class="btn-export" onclick="exportCSV()">匯出全部記錄（CSV）</button>
+      </div>
+
+      <div class="export-card">
+        <div class="export-title">📅 本月報表</div>
+        <div class="export-sub" id="exportMonthSub"></div>
+        <button class="btn-export" onclick="exportMonthCSV()">匯出本月記錄（CSV）</button>
+      </div>
+
+      <div class="section-label">資料管理</div>
+      <div class="export-card">
+        <div class="export-title">⚠️ 清除所有資料</div>
+        <div class="export-sub">此操作無法復原，請先匯出備份</div>
+        <button class="btn-export outline" onclick="clearAll()" style="color:var(--red);border-color:var(--red)">清除所有記錄</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-add" onclick="goPage('add')">
+    <span class="ni">➕</span>新增
+  </div>
+  <div class="nav-item" id="nav-records" onclick="goPage('records')">
+    <span class="ni">📋</span>記錄
+  </div>
+  <div class="nav-item" id="nav-stats" onclick="goPage('stats')">
+    <span class="ni">📊</span>統計
+  </div>
+  <div class="nav-item" id="nav-export" onclick="goPage('export')">
+    <span class="ni">📤</span>匯出
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let records = [];
+let currentMode = null;
+let receiptFiles = []; // base64 strings
+let currentFilter = 'all';
+let statsMonth = new Date();
+
+const MODE_META = {
+  'hsr':      { label: '高鐵', icon: '🚄', color: '#E8530A', cls: 'hsr',      needReceipt: true,  receiptType: '電子票據' },
+  'hsr-taxi': { label: '高鐵＋計程車', icon: '🚄🚕', color: '#F5C518', cls: 'hsr-taxi', needReceipt: true,  receiptType: '電子票據' },
+  'car':      { label: '私家車', icon: '🚗', color: '#2563EB', cls: 'car',     needReceipt: true,  receiptType: '加油發票' },
+  'govt':     { label: '公務車', icon: '🚐', color: '#16A34A', cls: 'govt',    needReceipt: false, receiptType: null },
+};
+
+// ── INIT ──
+function init() {
+  const saved = localStorage.getItem('commute-records');
+  if (saved) records = JSON.parse(saved);
+
+  // default date to today
+  const today = new Date();
+  document.getElementById('f-date').value = today.toISOString().slice(0,10);
+
+  statsMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  updateTopCount();
+  renderRecords();
+  renderStats();
+  updateExportLabels();
+}
+
+function save() {
+  localStorage.setItem('commute-records', JSON.stringify(records));
+  updateTopCount();
+}
+
+function updateTopCount() {
+  const m = new Date();
+  const count = records.filter(r => {
+    const d = new Date(r.date);
+    return d.getFullYear() === m.getFullYear() && d.getMonth() === m.getMonth();
+  }).length;
+  document.getElementById('topCount').textContent = count;
+}
+
+// ── NAVIGATION ──
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'records') renderRecords();
+  if (name === 'stats') renderStats();
+  if (name === 'export') updateExportLabels();
+}
+
+// ── MODE SELECT ──
+function selectMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.className = 'mode-btn';
+    if (b.dataset.mode === mode) b.classList.add('sel-' + mode);
+  });
+
+  const meta = MODE_META[mode];
+  const sec = document.getElementById('receiptSection');
+  const lbl = document.getElementById('receiptLabel');
+  const hint = document.getElementById('receiptHint');
+
+  if (meta.needReceipt) {
+    sec.style.display = 'block';
+    lbl.textContent = '上傳' + meta.receiptType;
+    hint.textContent = '點擊上傳' + meta.receiptType + '（可多張）';
+  } else {
+    sec.style.display = 'none';
+  }
+}
+
+// ── RECEIPT UPLOAD ──
+function handleReceipts(input) {
+  const files = Array.from(input.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      receiptFiles.push(e.target.result);
+      renderThumbs();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderThumbs() {
+  const row = document.getElementById('thumbRow');
+  const area = document.getElementById('receiptArea');
+  const cnt = document.getElementById('receiptCount');
+  row.innerHTML = '';
+  receiptFiles.forEach((src, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'thumb-wrap';
+    wrap.innerHTML = `<img class="thumb" src="${src}">
+      <button class="thumb-del" onclick="removeThumb(${i})">✕</button>`;
+    row.appendChild(wrap);
+  });
+  if (receiptFiles.length > 0) {
+    area.classList.add('has-file');
+    cnt.style.display = 'block';
+    cnt.textContent = `已選 ${receiptFiles.length} 張`;
+  } else {
+    area.classList.remove('has-file');
+    cnt.style.display = 'none';
+  }
+}
+
+function removeThumb(i) {
+  receiptFiles.splice(i, 1);
+  renderThumbs();
+}
+
+// ── SAVE RECORD ──
+function saveRecord() {
+  const date = document.getElementById('f-date').value;
+  const direction = document.getElementById('f-direction').value;
+  const note = document.getElementById('f-note').value.trim();
+
+  if (!date) { showToast('請選擇日期'); return; }
+  if (!currentMode) { showToast('請選擇通勤方式'); return; }
+
+  const meta = MODE_META[currentMode];
+  if (meta.needReceipt && receiptFiles.length === 0) {
+    if (!confirm(`${meta.receiptType} 尚未上傳，確定要儲存嗎？`)) return;
+  }
+
+  const rec = {
+    id: Date.now(),
+    date, direction,
+    mode: currentMode,
+    receipts: [...receiptFiles],
+    note,
+    createdAt: new Date().toISOString()
+  };
+
+  records.unshift(rec);
+  save();
+
+  // reset
+  currentMode = null;
+  receiptFiles = [];
+  document.querySelectorAll('.mode-btn').forEach(b => b.className = 'mode-btn');
+  document.getElementById('f-note').value = '';
+  document.getElementById('receiptSection').style.display = 'block';
+  document.getElementById('receiptLabel').textContent = '上傳票據';
+  document.getElementById('receiptHint').textContent = '點擊上傳電子票據或發票';
+  renderThumbs();
+
+  showToast('✅ 記錄已儲存');
+  setTimeout(() => goPage('records'), 800);
+}
+
+// ── RENDER RECORDS ──
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderRecords();
+}
+
+function renderRecords() {
+  const list = document.getElementById('recordList');
+  let data = [...records].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  if (currentFilter !== 'all') {
+    if (currentFilter === 'needs-receipt') {
+      data = data.filter(r => r.receipts && r.receipts.length > 0);
+    } else {
+      data = data.filter(r => r.mode === currentFilter);
+    }
+  }
+
+  if (data.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="icon">🗂️</div><p>沒有符合的記錄</p></div>`;
+    return;
+  }
+
+  list.innerHTML = data.map(r => {
+    const meta = MODE_META[r.mode];
+    const hasR = r.receipts && r.receipts.length > 0;
+    const dateStr = r.date.replace(/-/g, '/');
+    const weekDay = ['日','一','二','三','四','五','六'][new Date(r.date).getDay()];
+    const thumbsHtml = hasR ? r.receipts.map(src =>
+      `<img src="${src}" onclick="event.stopPropagation()">`
+    ).join('') : '';
+
+    return `<div class="rec-card" onclick="toggleRec(${r.id})">
+      <div class="rec-header">
+        <div class="rec-badge ${meta.cls}">${meta.icon}</div>
+        <div class="rec-info">
+          <div class="rec-date">${dateStr}（${weekDay}）${r.direction}</div>
+          <div class="rec-mode">${meta.label}</div>
+          ${r.note ? `<div class="rec-note">📝 ${r.note}</div>` : ''}
+        </div>
+        <div class="rec-right">
+          <div class="rec-receipt ${hasR ? 'has' : 'none'}">
+            ${hasR ? `📎 ${r.receipts.length}張` : (meta.needReceipt ? '⚠ 無票據' : '無需票據')}
+          </div>
+        </div>
+      </div>
+      <div class="rec-body" id="body-${r.id}">
+        <div class="rec-body-row"><span class="k">通勤方式</span><span class="v">${meta.icon} ${meta.label}</span></div>
+        <div class="rec-body-row"><span class="k">方向</span><span class="v">${r.direction}</span></div>
+        <div class="rec-body-row"><span class="k">需要票據</span><span class="v">${meta.needReceipt ? (hasR ? '✅ 已上傳' : '⚠️ 未上傳') : '無需報帳'}</span></div>
+        ${r.note ? `<div class="rec-body-row"><span class="k">備註</span><span class="v">${r.note}</span></div>` : ''}
+        ${hasR ? `<div class="rec-thumbs">${thumbsHtml}</div>` : ''}
+        <div class="rec-actions">
+          <button class="rec-del" onclick="event.stopPropagation(); deleteRec(${r.id})">🗑 刪除此記錄</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRec(id) {
+  const body = document.getElementById('body-' + id);
+  body.classList.toggle('open');
+}
+
+function deleteRec(id) {
+  if (!confirm('確定要刪除這筆記錄嗎？')) return;
+  records = records.filter(r => r.id !== id);
+  save();
+  renderRecords();
+  showToast('已刪除');
+}
+
+// ── STATS ──
+function changeMonth(delta) {
+  statsMonth.setMonth(statsMonth.getMonth() + delta);
+  renderStats();
+}
+
+function renderStats() {
+  const y = statsMonth.getFullYear();
+  const m = statsMonth.getMonth();
+  document.getElementById('monthLabel').textContent = `${y} 年 ${m+1} 月`;
+
+  const monthly = records.filter(r => {
+    const d = new Date(r.date);
+    return d.getFullYear() === y && d.getMonth() === m;
+  });
+
+  const needsReceipt = monthly.filter(r => MODE_META[r.mode].needReceipt);
+  const hasReceipt = needsReceipt.filter(r => r.receipts && r.receipts.length > 0);
+
+  document.getElementById('s-total').textContent = monthly.length;
+  document.getElementById('s-needs').textContent = needsReceipt.length;
+  document.getElementById('s-receipt').childNodes[0].textContent = hasReceipt.length + ' ';
+  document.getElementById('s-receipt-total').textContent = needsReceipt.length;
+
+  // breakdown
+  const chart = document.getElementById('breakdownChart');
+  const modes = Object.keys(MODE_META);
+  const max = Math.max(...modes.map(k => monthly.filter(r => r.mode === k).length), 1);
+  const colors = { hsr: '#E8530A', 'hsr-taxi': '#D97706', car: '#2563EB', govt: '#16A34A' };
+
+  chart.innerHTML = modes.map(k => {
+    const cnt = monthly.filter(r => r.mode === k).length;
+    const pct = Math.round(cnt / max * 100);
+    const meta = MODE_META[k];
+    return `<div class="breakdown-row">
+      <div class="breakdown-label">
+        <span class="name">${meta.icon} ${meta.label}</span>
+        <span class="cnt">${cnt} 次</span>
+      </div>
+      <div class="breakdown-bar">
+        <div class="breakdown-fill" style="width:${pct}%;background:${colors[k]}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── EXPORT ──
+function updateExportLabels() {
+  const m = new Date();
+  document.getElementById('exportMonthSub').textContent =
+    `${m.getFullYear()} 年 ${m.getMonth()+1} 月的通勤記錄`;
+}
+
+function toCSV(data) {
+  const headers = ['日期','方向','通勤方式','票據類型','是否有票據','備註'];
+  const rows = data.map(r => {
+    const meta = MODE_META[r.mode];
+    return [
+      r.date, r.direction, meta.label,
+      meta.receiptType || '無需票據',
+      r.receipts && r.receipts.length > 0 ? `是(${r.receipts.length}張)` : (meta.needReceipt ? '否' : '無需'),
+      r.note || ''
+    ].map(v => `"${v}"`).join(',');
+  });
+  return [headers.join(','), ...rows].join('\n');
+}
+
+function downloadCSV(content, filename) {
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + content], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ 已匯出 ' + filename);
+}
+
+function exportCSV() {
+  if (records.length === 0) { showToast('沒有記錄可匯出'); return; }
+  downloadCSV(toCSV(records), `通勤記錄_全部.csv`);
+}
+
+function exportMonthCSV() {
+  const m = new Date();
+  const monthly = records.filter(r => {
+    const d = new Date(r.date);
+    return d.getFullYear() === m.getFullYear() && d.getMonth() === m.getMonth();
+  });
+  if (monthly.length === 0) { showToast('本月沒有記錄'); return; }
+  downloadCSV(toCSV(monthly), `通勤記錄_${m.getFullYear()}${String(m.getMonth()+1).padStart(2,'0')}.csv`);
+}
+
+function clearAll() {
+  if (!confirm('確定要清除所有記錄嗎？\n此操作無法復原！')) return;
+  records = [];
+  save();
+  renderRecords();
+  showToast('已清除所有資料');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+init();
+</script>
+</body>
+</html>
