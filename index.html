@@ -220,6 +220,7 @@ body{font-family:-apple-system,'PingFang TC',sans-serif;background:var(--light);
 .loc-input:focus{border-color:var(--blue);}
 .loc-add-btn{padding:12px 16px;background:var(--blue);color:#fff;font-size:14px;font-weight:600;border:none;border-radius:10px;cursor:pointer;}
 
+.field.hidden{display:none;}
 .toast{position:fixed;bottom:calc(80px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;white-space:nowrap;z-index:999;pointer-events:none;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 .empty{text-align:center;padding:40px 20px;color:var(--sub);}
@@ -251,14 +252,14 @@ body{font-family:-apple-system,'PingFang TC',sans-serif;background:var(--light);
       <label>日期</label>
       <input type="date" id="f-date">
     </div>
-    <div class="field">
+    <div class="field" id="fieldDirection">
       <label>方向</label>
       <select id="f-direction" onchange="onDirectionChange()">
         <option value="上班">上班</option>
         <option value="下班">下班</option>
       </select>
     </div>
-    <div class="field">
+    <div class="field" id="fieldTime">
       <label id="timeLabel">上班時間</label>
       <div class="time-picker-wrap">
         <div class="time-col">
@@ -627,22 +628,25 @@ function initTimePicker(){
   ms.addEventListener('scroll',()=>highlightVisible(ms),{passive:true});
 }
 
-function scrollToTime(h,mIdx){
+function scrollToTime(h, mIdx){
   // h = hour integer (0-23), mIdx = minute index (0=00,1=15,2=30,3=45)
+  // Structure: pad[0], pad[1], real[0], real[1]...
+  // real[i].offsetTop = (2+i)*40
+  // visible center = scrollTop + 60 (120px / 2)
+  // to align: scrollTop = (2+i)*40 + 20 - 60 = (i+1)*40
   const hs=document.getElementById('hourScroll');
   const ms=document.getElementById('minScroll');
-  // each item is 40px; padding adds 2 items before real items
-  hs.scrollTop=(h+2)*40;
-  ms.scrollTop=(mIdx+2)*40;
-  setTimeout(()=>{highlightVisible(hs);highlightVisible(ms);},60);
+  hs.scrollTop = (h + 1) * 40;
+  ms.scrollTop = (mIdx + 1) * 40;
+  setTimeout(()=>{ highlightVisible(hs); highlightVisible(ms); }, 80);
 }
 
 function highlightVisible(el){
-  // center of the visible window
-  const mid=el.scrollTop+el.offsetHeight/2;
-  el.querySelectorAll('.time-item').forEach(item=>{
-    const itemMid=item.offsetTop+20; // 20 = half of 40px item
-    item.classList.toggle('selected',Math.abs(itemMid-mid)<20);
+  // center of visible area
+  const center = el.scrollTop + 60; // 60 = half of 120px height
+  el.querySelectorAll('.time-item').forEach(item => {
+    const itemCenter = item.offsetTop + 20; // 20 = half of 40px item
+    item.classList.toggle('selected', Math.abs(itemCenter - center) < 20);
   });
 }
 
@@ -671,6 +675,10 @@ function selectMode(mode){
     b.className='mode-btn';
     if(b.dataset.mode===mode) b.classList.add('sel-'+mode);
   });
+  // 放假：隱藏方向與時間欄位
+  const isHoliday=(mode==='holiday');
+  document.getElementById('fieldDirection').classList.toggle('hidden', isHoliday);
+  document.getElementById('fieldTime').classList.toggle('hidden', isHoliday);
 }
 
 // ── LOCATIONS ──
@@ -719,15 +727,17 @@ function deleteLocation(i){
 // ── SAVE ──
 function saveRecord(){
   const date=document.getElementById('f-date').value;
-  const direction=document.getElementById('f-direction').value;
   const location=document.getElementById('f-location').value;
   const note=document.getElementById('f-note').value.trim();
-  const time=getPickedTime();
+  const isHoliday=(currentMode==='holiday');
+  const time=isHoliday?null:getPickedTime();
+  const direction=isHoliday?'放假':document.getElementById('f-direction').value;
+
   if(!date){showToast('請選擇日期');return;}
   if(!currentMode){showToast('請選擇通勤方式');return;}
 
-  // Fix 4: validate time order when both go & back exist on same day
-  if(direction==='下班'){
+  // Fix 4: validate time order when both go & back exist on same day (skip for holiday)
+  if(!isHoliday&&direction==='下班'){
     const goRec=records.find(r=>r.date===date&&r.direction==='上班'&&r.time);
     if(goRec){
       const [gh,gm]=goRec.time.split(':').map(Number);
@@ -738,7 +748,7 @@ function saveRecord(){
       }
     }
   }
-  if(direction==='上班'){
+  if(!isHoliday&&direction==='上班'){
     const bkRec=records.find(r=>r.date===date&&r.direction==='下班'&&r.time);
     if(bkRec){
       const [bh,bm]=bkRec.time.split(':').map(Number);
@@ -941,6 +951,10 @@ function renderHoursStats(){
       if(!hasLoc) return;
     }
 
+    // 排除放假：當天只要有放假記錄就不計算工時
+    const hasHoliday=allDayRecs.some(r=>r.mode==='holiday');
+    if(hasHoliday) return;
+
     // find go/back from ALL records of this date (not filtered by loc)
     // so that paired times are always matched correctly
     const go=allDayRecs.find(r=>r.direction==='上班'&&r.time);
@@ -1116,13 +1130,13 @@ function initEditTimePicker(h, mVal){
     el.innerHTML=pad+items.map(v=>`<div class="time-item" data-val="${v}">${v}</div>`).join('')+pad;
     el.addEventListener('scroll',()=>highlightVisible(el),{passive:true});
   });
-  // scroll to given time
   const hs=document.getElementById('eHourScroll');
   const ms=document.getElementById('eMinScroll');
   const mIdx=MINS.indexOf(mVal)>=0?MINS.indexOf(mVal):0;
+  // same formula as scrollToTime: scrollTop = realIdx * 40
   setTimeout(()=>{
-    hs.scrollTop=(h+2)*40;
-    ms.scrollTop=(mIdx+2)*40;
+    hs.scrollTop = (h + 1) * 40;
+    ms.scrollTop = (mIdx + 1) * 40;
     highlightVisible(hs);
     highlightVisible(ms);
   },80);
@@ -1171,6 +1185,11 @@ function openEditModal(id){
   const h=parseInt(timeParts[0])||9;
   const mVal=timeParts[1]||'00';
   initEditTimePicker(h, mVal);
+
+  // hide direction/time if holiday
+  const isHoliday=(rec.mode==='holiday');
+  document.getElementById('e-direction').closest('.edit-field').classList.toggle('hidden', isHoliday);
+  document.getElementById('eTimeLabel').closest('.edit-field').classList.toggle('hidden', isHoliday);
 }
 
 function selectEditMode(mode){
@@ -1178,6 +1197,10 @@ function selectEditMode(mode){
   document.querySelectorAll('#editModeGrid .edit-mode-btn').forEach(b=>{
     b.className='edit-mode-btn'+(b.dataset.mode===mode?' sel-'+mode:'');
   });
+  // 放假：隱藏方向與時間欄位
+  const isHoliday=(mode==='holiday');
+  document.getElementById('e-direction').closest('.edit-field').classList.toggle('hidden', isHoliday);
+  document.getElementById('eTimeLabel').closest('.edit-field').classList.toggle('hidden', isHoliday);
 }
 
 function closeEditModal(e){
@@ -1188,26 +1211,29 @@ function closeEditModal(e){
 function saveEdit(){
   const rec=records.find(r=>r.id===editingId);
   if(!rec) return;
-  const newDir=document.getElementById('e-direction').value;
-  const newTime=getEditPickedTime();
+  const isHoliday=(editMode==='holiday');
+  const newDir=isHoliday?'放假':document.getElementById('e-direction').value;
+  const newTime=isHoliday?null:getEditPickedTime();
   const newLoc=document.getElementById('e-location').value;
   const newNote=document.getElementById('e-note').value.trim();
 
-  // validate time order
-  if(newDir==='下班'){
-    const goRec=records.find(r=>r.date===rec.date&&r.direction==='上班'&&r.time&&r.id!==editingId);
-    if(goRec){
-      const [gh,gm]=goRec.time.split(':').map(Number);
-      const [bh,bm]=newTime.split(':').map(Number);
-      if(bh*60+bm<=gh*60+gm){showToast(`❌ 下班時間不能早於上班時間（${goRec.time}）`);return;}
+  // validate time order (skip for holiday)
+  if(!isHoliday){
+    if(newDir==='下班'){
+      const goRec=records.find(r=>r.date===rec.date&&r.direction==='上班'&&r.time&&r.id!==editingId);
+      if(goRec){
+        const [gh,gm]=goRec.time.split(':').map(Number);
+        const [bh,bm]=newTime.split(':').map(Number);
+        if(bh*60+bm<=gh*60+gm){showToast(`❌ 下班時間不能早於上班時間（${goRec.time}）`);return;}
+      }
     }
-  }
-  if(newDir==='上班'){
-    const bkRec=records.find(r=>r.date===rec.date&&r.direction==='下班'&&r.time&&r.id!==editingId);
-    if(bkRec){
-      const [bh,bm]=bkRec.time.split(':').map(Number);
-      const [gh,gm]=newTime.split(':').map(Number);
-      if(gh*60+gm>=bh*60+bm){showToast(`❌ 上班時間不能晚於下班時間（${bkRec.time}）`);return;}
+    if(newDir==='上班'){
+      const bkRec=records.find(r=>r.date===rec.date&&r.direction==='下班'&&r.time&&r.id!==editingId);
+      if(bkRec){
+        const [bh,bm]=bkRec.time.split(':').map(Number);
+        const [gh,gm]=newTime.split(':').map(Number);
+        if(gh*60+gm>=bh*60+bm){showToast(`❌ 上班時間不能晚於下班時間（${bkRec.time}）`);return;}
+      }
     }
   }
 
