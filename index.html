@@ -83,18 +83,21 @@ body{font-family:-apple-system,'PingFang TC',sans-serif;background:var(--light);
 .cal-dow{text-align:center;padding:8px 0;font-size:10px;font-weight:600;color:rgba(255,255,255,0.7);}
 .cal-dow:first-child{color:#FF8A80;}.cal-dow:last-child{color:#80D8FF;}
 .cal-days{display:grid;grid-template-columns:repeat(7,1fr);}
-.cal-day{height:80px;padding:4px 3px 3px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;overflow:hidden;}
+.cal-day{height:96px;padding:3px 3px 2px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;}
 .cal-day:nth-child(7n){border-right:none;}
 .cal-day.empty{background:#FAFBFC;cursor:default;}
 .cal-day.today .day-num{background:var(--blue);color:#fff;border-radius:50%;}
 .cal-day.sunday .day-num{color:var(--red);}
 .cal-day.saturday .day-num{color:var(--blue);}
-.day-num{font-size:11px;font-weight:600;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;}
-.day-row{display:flex;justify-content:space-between;align-items:center;margin-top:1px;}
+.day-num{font-size:11px;font-weight:600;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:0 auto;flex-shrink:0;}
+/* fixed-height zones so every cell aligns */
+.day-dots-zone{height:32px;display:flex;flex-direction:column;justify-content:center;gap:1px;flex-shrink:0;}
+.day-row{display:flex;justify-content:space-between;align-items:center;height:15px;}
 .day-dot{width:14px;height:14px;border-radius:3px;font-size:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .day-dot.empty-slot{width:14px;height:14px;}
-.day-loc{font-size:7px;color:var(--teal);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
-.day-hours{font-size:7px;color:var(--amber);text-align:center;font-weight:600;}
+.day-meta-zone{height:28px;display:flex;flex-direction:column;justify-content:flex-end;flex-shrink:0;}
+.day-loc{font-size:7px;color:var(--teal);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;}
+.day-hours{font-size:7px;color:var(--amber);text-align:center;font-weight:600;line-height:1.4;}
 
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:none;align-items:flex-end;}
@@ -139,13 +142,19 @@ body{font-family:-apple-system,'PingFang TC',sans-serif;background:var(--light);
 
 /* BAR CHART */
 .chart-card{background:var(--white);border-radius:var(--r);padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px;}
-.chart-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;}
-.bar-chart{display:flex;align-items:flex-end;gap:4px;height:140px;overflow-x:auto;padding-bottom:4px;}
-.bar-chart::-webkit-scrollbar{display:none;}
-.bar-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;min-width:32px;}
-.bar-fill{width:24px;border-radius:4px 4px 0 0;background:var(--blue);min-height:2px;transition:height .3s;}
-.bar-val{font-size:8px;color:var(--gray);font-weight:600;}
-.bar-lbl{font-size:8px;color:var(--sub);white-space:nowrap;}
+.chart-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;}
+.chart-legend{font-size:10px;color:var(--red);margin-bottom:10px;}
+.bar-chart-wrap{position:relative;width:100%;}
+.bar-chart{display:flex;align-items:flex-end;gap:2px;height:160px;width:100%;overflow:hidden;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;}
+.bar-fill{width:100%;border-radius:3px 3px 0 0;min-height:2px;transition:height .3s;}
+.bar-fill.over8{background:#E8530A;}
+.bar-fill.under8{background:var(--blue);}
+.bar-val{font-size:7px;color:var(--gray);font-weight:600;white-space:nowrap;}
+.bar-lbl{font-size:7px;color:var(--sub);white-space:nowrap;}
+/* 8h reference line */
+.ref-line{position:absolute;left:0;right:0;border-top:1.5px dashed var(--red);pointer-events:none;}
+.ref-label{position:absolute;right:0;font-size:9px;color:var(--red);font-weight:700;background:var(--white);padding:0 2px;transform:translateY(-100%);}
 
 /* EXPORT / IMPORT */
 .io-wrap{padding:14px;}
@@ -376,7 +385,11 @@ body{font-family:-apple-system,'PingFang TC',sans-serif;background:var(--light);
   </div>
   <div class="chart-card">
     <div class="chart-title">每日工時直條圖</div>
-    <div class="bar-chart" id="hoursChart"></div>
+    <div class="chart-legend">── 紅虛線 = 8h 基準</div>
+    <div class="bar-chart-wrap">
+      <div class="bar-chart" id="hoursChart"></div>
+      <div class="ref-line" id="refLine" style="display:none"><span class="ref-label">8h</span></div>
+    </div>
   </div>
 </div>
 </div>
@@ -522,25 +535,21 @@ const MINS=['00','15','30','45'];
 function initTimePicker(){
   const hs=document.getElementById('hourScroll');
   const ms=document.getElementById('minScroll');
-  // padding items for snap
   const pad='<div class="time-item" style="opacity:0">--</div><div class="time-item" style="opacity:0">--</div>';
   hs.innerHTML=pad+HOURS.map(h=>`<div class="time-item">${h}</div>`).join('')+pad;
   ms.innerHTML=pad+MINS.map(m=>`<div class="time-item">${m}</div>`).join('')+pad;
-
-  // set default to current time rounded to 15min
-  const now=new Date();
-  const h=now.getHours();
-  const rawMin=now.getMinutes();
-  const mIdx=Math.round(rawMin/15)%4;
-  setTimeout(()=>{
-    hs.scrollTop=(h+2)*40; // +2 for padding items
-    ms.scrollTop=(mIdx+2)*40;
-    highlightVisible(hs);
-    highlightVisible(ms);
-  },100);
-
+  // default 09:00 (上班)
+  setTimeout(()=>{ scrollToTime(9,0); },100);
   hs.addEventListener('scroll',()=>highlightVisible(hs),{passive:true});
   ms.addEventListener('scroll',()=>highlightVisible(ms),{passive:true});
+}
+
+function scrollToTime(h,mIdx){
+  const hs=document.getElementById('hourScroll');
+  const ms=document.getElementById('minScroll');
+  hs.scrollTop=(h+2)*40;
+  ms.scrollTop=(mIdx+2)*40;
+  setTimeout(()=>{highlightVisible(hs);highlightVisible(ms);},50);
 }
 
 function highlightVisible(el){
@@ -564,6 +573,8 @@ function getPickedTime(){
 function onDirectionChange(){
   const dir=document.getElementById('f-direction').value;
   document.getElementById('timeLabel').textContent=dir==='上班'?'上班時間':'下班時間';
+  if(dir==='上班') scrollToTime(9,0);   // 09:00
+  else             scrollToTime(18,0);  // 18:00
 }
 
 // ── MODE ──
@@ -627,12 +638,37 @@ function saveRecord(){
   const time=getPickedTime();
   if(!date){showToast('請選擇日期');return;}
   if(!currentMode){showToast('請選擇通勤方式');return;}
+
+  // Fix 4: validate time order when both go & back exist on same day
+  if(direction==='下班'){
+    const goRec=records.find(r=>r.date===date&&r.direction==='上班'&&r.time);
+    if(goRec){
+      const [gh,gm]=goRec.time.split(':').map(Number);
+      const [bh,bm]=time.split(':').map(Number);
+      if(bh*60+bm <= gh*60+gm){
+        showToast(`❌ 下班時間（${time}）不能早於或等於上班時間（${goRec.time}）`);
+        return;
+      }
+    }
+  }
+  if(direction==='上班'){
+    const bkRec=records.find(r=>r.date===date&&r.direction==='下班'&&r.time);
+    if(bkRec){
+      const [bh,bm]=bkRec.time.split(':').map(Number);
+      const [gh,gm]=time.split(':').map(Number);
+      if(gh*60+gm >= bh*60+bm){
+        showToast(`❌ 上班時間（${time}）不能晚於或等於已記錄的下班時間（${bkRec.time}）`);
+        return;
+      }
+    }
+  }
+
   records.unshift({id:Date.now(),date,direction,mode:currentMode,location,note,time});
   saveData();
   currentMode=null;
   document.querySelectorAll('.mode-btn').forEach(b=>b.className='mode-btn');
   document.getElementById('f-note').value='';
-  document.getElementById('f-location').value='';
+  // f-location intentionally kept so last selection persists
   showToast('✅ 記錄已儲存');
 }
 
@@ -683,14 +719,15 @@ function renderCal(){
       const bkH=bkR?`<div class="day-dot" style="background:${MODE_META[bkR.mode].bg}">${MODE_META[bkR.mode].icon}</div>`:`<div class="day-dot empty-slot"></div>`;
       rows+=`<div class="day-row">${goH}${bkH}</div>`;
     }
-    // location & hours
     const locs=[...new Set([...dayData.go,...dayData.back].filter(r=>r.location).map(r=>r.location))];
     const hrs=calcDayHours(ds);
-    const locStr=locs.length?`<div class="day-loc">📍${locs[0]}</div>`:'';
-    const hrsStr=hrs?`<div class="day-hours">⏱${hrs}</div>`:'';
+    const locStr=locs.length?`<div class="day-loc">📍${locs[0]}</div>`:'<div class="day-loc"></div>';
+    const hrsStr=hrs?`<div class="day-hours">⏱${hrs}</div>`:'<div class="day-hours"></div>';
 
     html+=`<div class="${cls}" onclick="openDayModal('${ds}')">
-      <div class="day-num">${d}</div>${rows}${locStr}${hrsStr}
+      <div class="day-num">${d}</div>
+      <div class="day-dots-zone">${rows}</div>
+      <div class="day-meta-zone">${locStr}${hrsStr}</div>
     </div>`;
   }
   document.getElementById('calDays').innerHTML=html;
@@ -819,30 +856,45 @@ function renderHoursStats(){
     }
   });
 
-  const totalMins=dayHours.reduce((a,d)=>a+d.mins,0);
-  const avgMins=dayHours.length?Math.round(totalMins/dayHours.length):0;
   const fmtH=mins=>{const h=Math.floor(mins/60),m=mins%60;return m?`${h}h${m}m`:`${h}h`;};
 
+  // 5a: only count days that have actual hours recorded
+  const totalMins=dayHours.reduce((a,d)=>a+d.mins,0);
+  const avgMins=dayHours.length?Math.round(totalMins/dayHours.length):0;
+
   document.getElementById('hs-days').textContent=dayHours.length;
-  document.getElementById('hs-avg').textContent=avgMins?fmtH(avgMins):'0h';
-  document.getElementById('hs-total').textContent=totalMins?fmtH(totalMins):'0h';
+  document.getElementById('hs-avg').textContent=dayHours.length?fmtH(avgMins):'—';
+  document.getElementById('hs-total').textContent=dayHours.length?fmtH(totalMins):'—';
   document.getElementById('hs-label').textContent=`${from.replace(/-/g,'/')} ～ ${to.replace(/-/g,'/')} 總工時`;
 
-  // bar chart — show all dates with data, up to 60
-  const chartData=dayHours.slice(-60);
-  const maxM=Math.max(...chartData.map(d=>d.mins),1);
+  const chartData=dayHours; // all days with data (no cap — bars auto-fit)
   const chart=document.getElementById('hoursChart');
+  const refLine=document.getElementById('refLine');
+
   if(!chartData.length){
-    chart.innerHTML='<div class="empty" style="width:100%"><div class="icon">📊</div><p>無工時資料</p></div>';
+    chart.innerHTML='<div style="width:100%;text-align:center;padding:30px;color:var(--sub);font-size:13px">📊 無工時資料</div>';
+    refLine.style.display='none';
     return;
   }
+
+  // 5b: 8h baseline
+  const CHART_H=160; // px (matches CSS)
+  const REF_MINS=8*60; // 480 min
+  const maxM=Math.max(...chartData.map(d=>d.mins), REF_MINS+1);
+  // ref line position from bottom (px from bottom of chart area)
+  const refPx=Math.round(REF_MINS/maxM*CHART_H);
+  refLine.style.display='block';
+  refLine.style.bottom=refPx+'px';
+
+  // 5c: bars fill full width — flex:1 handles it via CSS, no min-width needed
   chart.innerHTML=chartData.map(d=>{
-    const pct=Math.round(d.mins/maxM*120);
+    const barH=Math.max(Math.round(d.mins/maxM*CHART_H),2);
     const lbl=d.date.slice(5).replace('-','/');
     const val=fmtH(d.mins);
+    const over=d.mins>REF_MINS;
     return `<div class="bar-col">
       <div class="bar-val">${val}</div>
-      <div class="bar-fill" style="height:${pct}px;background:var(--blue)"></div>
+      <div class="bar-fill ${over?'over8':'under8'}" style="height:${barH}px"></div>
       <div class="bar-lbl">${lbl}</div>
     </div>`;
   }).join('');
