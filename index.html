@@ -211,16 +211,19 @@ option{background:#2a3345;color:#fff;}
 .chart-card{background:rgba(40,50,65,0.88);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:14px 16px;box-shadow:0 2px 16px rgba(0,0,0,0.2);margin-bottom:10px;}
 .chart-title{font-size:25px;font-weight:700;color:#fff;margin-bottom:12px;}
 .chart-legend{font-size:10px;color:rgba(239,68,68,0.8);margin-bottom:10px;}
-.bar-chart-wrap{position:relative;width:100%;}
-.bar-chart{display:flex;align-items:flex-end;gap:2px;height:160px;width:100%;overflow:visible;padding-top:22px;}
-.bar-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;}
+.bar-chart-wrap{position:relative;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.bar-chart-wrap::-webkit-scrollbar{height:3px;}
+.bar-chart-wrap::-webkit-scrollbar-track{background:transparent;}
+.bar-chart-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2);border-radius:2px;}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:200px;min-width:100%;width:max-content;overflow:visible;padding-top:30px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:0 0 auto;width:52px;}
 .bar-fill{width:100%;border-radius:3px 3px 0 0;min-height:2px;transition:height .3s;}
 .bar-fill.over8{background:#F97B3A;}
 .bar-fill.under8{background:#0EA5E9;}
-.bar-val{font-size:7px;color:rgba(255,255,255,0.6);font-weight:600;white-space:nowrap;}
-.bar-lbl{font-size:7px;color:rgba(255,255,255,0.4);white-space:nowrap;}
-.ref-line{position:absolute;left:0;right:0;border-top:2.5px dashed rgba(239,68,68,0.85);pointer-events:none;}
-.ref-label{position:absolute;right:0;font-size:9px;color:#EF4444;font-weight:700;background:rgba(40,50,65,0.95);padding:0 3px;transform:translateY(-100%);}
+.bar-val{font-size:15px;color:rgba(255,255,255,0.6);font-weight:600;white-space:nowrap;}
+.bar-lbl{font-size:15px;color:rgba(255,255,255,0.4);white-space:nowrap;}
+.ref-line{position:absolute;left:0;right:0;border-top:2.5px dashed rgba(239,68,68,0.85);pointer-events:none;z-index:10;}
+.ref-label{position:sticky;left:0;font-size:9px;color:#EF4444;font-weight:700;background:rgba(40,50,65,0.95);padding:0 4px;transform:translateY(-100%);display:inline-block;}
 
 /* ── EXPORT / IMPORT ── */
 .io-wrap{padding:14px;}
@@ -553,8 +556,9 @@ option{background:#2a3345;color:#fff;}
     <div class="chart-title">每日工時直條圖</div>
     <div class="chart-legend">── 紅虛線 = 8h 基準</div>
     <div class="bar-chart-wrap">
-      <div class="bar-chart" id="hoursChart"></div>
-      <div class="ref-line" id="refLine" style="display:none"><span class="ref-label">8h</span></div>
+      <div class="bar-chart" id="hoursChart">
+        <div class="ref-line" id="refLine" style="display:none"><span class="ref-label">8h</span></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1118,25 +1122,28 @@ function renderHoursStats(){
   const refLine=document.getElementById('refLine');
 
   if(!chartData.length){
-    chart.innerHTML='<div style="width:100%;text-align:center;padding:30px;color:var(--sub);font-size:13px">📊 無工時資料</div>';
+    chart.innerHTML='<div style="padding:30px;color:rgba(255,255,255,0.4);font-size:13px">📊 無工時資料</div>';
     refLine.style.display='none';
     return;
   }
 
   // 5b: 8h baseline - use actual rendered height for accuracy
   const chartEl=document.getElementById('hoursChart');
-  const CHART_TOTAL=chartEl.offsetHeight||160;
-  const PADDING_TOP=parseInt(getComputedStyle(chartEl).paddingTop)||22;
+  const CHART_TOTAL=chartEl.offsetHeight||200;
+  const PADDING_TOP=parseInt(getComputedStyle(chartEl).paddingTop)||30;
   const BAR_AREA=CHART_TOTAL-PADDING_TOP;
   const REF_MINS=8*60; // 480 min
   // Add 15% headroom above the tallest bar so labels aren't clipped
   const maxM=Math.max(...chartData.map(d=>d.mins), REF_MINS) * 1.15;
   // ref line position from bottom of bar-area
   const refPx=Math.round(REF_MINS/maxM*BAR_AREA);
-  refLine.style.display='block';
-  refLine.style.bottom=refPx+'px';
 
-  // 5c: bars fill full width
+  // Set chart min-width: each bar-col is 52px + 4px gap
+  const colW=56;
+  const chartMinW=Math.max(chartData.length*colW, chartEl.parentElement.offsetWidth||300);
+  chart.style.minWidth=chartMinW+'px';
+
+  // 5c: render bars
   chart.innerHTML=chartData.map(d=>{
     const barH=Math.max(Math.round(d.mins/maxM*BAR_AREA),2);
     const lbl=d.date.slice(5).replace('-','/');
@@ -1148,6 +1155,12 @@ function renderHoursStats(){
       <div class="bar-lbl">${lbl}</div>
     </div>`;
   }).join('');
+
+  // Re-append ref-line inside chart (innerHTML cleared it)
+  refLine.style.display='block';
+  refLine.style.bottom=refPx+'px';
+  refLine.style.minWidth=chartMinW+'px';
+  chart.appendChild(refLine);
 }
 
 // ── EXPORT / IMPORT ──
