@@ -61,9 +61,9 @@ body{
 /* ── FORM ── */
 .form-wrap{padding:16px;}
 .section-label{
-  font-size:13px;font-weight:700;color:#fff;
-  letter-spacing:0.2px;margin:20px 0 10px;
-  text-shadow:0 1px 4px rgba(0,0,0,0.3);
+  font-size:25px;font-weight:700;color:#fff;
+  letter-spacing:-0.2px;margin:20px 0 10px;
+  text-shadow:0 1px 6px rgba(0,0,0,0.4);
 }
 .card{background:rgba(40,50,65,0.88);border-radius:var(--r);overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08);}
 .field{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.08);gap:10px;}
@@ -108,9 +108,11 @@ option{background:#2a3345;color:#fff;}
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .cal-nav .arrow{background:rgba(40,50,65,0.85);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:15px;color:#fff;}
 .cal-nav .month-title{font-size:16px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.3);}
-.legend{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
-.legend-item{display:flex;align-items:center;gap:2px;font-size:9px;color:rgba(255,255,255,0.75);}
-.legend-dot{width:14px;height:14px;border-radius:3px;font-size:8px;display:flex;align-items:center;justify-content:center;}
+.legend{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.legend-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);}
+.legend-dot{width:22px;height:22px;border-radius:4px;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.legend-dir{font-size:13px;font-weight:600;color:rgba(255,255,255,0.75);}
 .cal-grid{background:var(--white);border-radius:var(--r);box-shadow:0 4px 24px rgba(0,0,0,0.15);overflow:hidden;}
 .cal-header{display:grid;grid-template-columns:repeat(7,1fr);background:var(--navy);}
 .cal-dow{text-align:center;padding:10px 0;font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);letter-spacing:0.6px;}
@@ -181,7 +183,7 @@ option{background:#2a3345;color:#fff;}
 /* ── STATS / HOURS ── */
 .stats-wrap{padding:14px;}
 .filter-card{background:rgba(40,50,65,0.88);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:14px 16px;box-shadow:0 2px 16px rgba(0,0,0,0.2);margin-bottom:12px;}
-.filter-title{font-size:13px;font-weight:700;color:#fff;letter-spacing:0.2px;margin-bottom:10px;}
+.filter-title{font-size:25px;font-weight:700;color:#fff;letter-spacing:-0.2px;margin-bottom:14px;}
 .date-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
 .date-row label{font-size:13px;color:rgba(255,255,255,0.55);min-width:32px;font-weight:500;}
 .date-row input,.date-row select{flex:1;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 10px;font-size:13px;color:#fff;outline:none;font-family:inherit;background:rgba(255,255,255,0.08);color-scheme:dark;}
@@ -195,7 +197,7 @@ option{background:#2a3345;color:#fff;}
 .summary-num{font-size:26px;font-weight:800;}
 .summary-label{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;}
 .mode-stat-card{background:rgba(40,50,65,0.88);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:14px 16px;box-shadow:0 2px 16px rgba(0,0,0,0.2);margin-bottom:10px;}
-.mode-stat-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;}
+.mode-stat-title{font-size:25px;font-weight:700;color:#fff;margin-bottom:14px;}
 .mode-stat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .mode-stat-row:last-child{margin-bottom:0;}
 .mode-stat-icon{font-size:20px;width:30px;text-align:center;}
@@ -207,7 +209,7 @@ option{background:#2a3345;color:#fff;}
 
 /* ── BAR CHART ── */
 .chart-card{background:rgba(40,50,65,0.88);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:14px 16px;box-shadow:0 2px 16px rgba(0,0,0,0.2);margin-bottom:10px;}
-.chart-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:8px;}
+.chart-title{font-size:25px;font-weight:700;color:#fff;margin-bottom:12px;}
 .chart-legend{font-size:10px;color:rgba(239,68,68,0.8);margin-bottom:10px;}
 .bar-chart-wrap{position:relative;width:100%;}
 .bar-chart{display:flex;align-items:flex-end;gap:2px;height:160px;width:100%;overflow:visible;padding-top:22px;}
@@ -223,7 +225,7 @@ option{background:#2a3345;color:#fff;}
 /* ── EXPORT / IMPORT ── */
 .io-wrap{padding:14px;}
 .io-card{background:rgba(40,50,65,0.88);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r);padding:16px;box-shadow:0 2px 16px rgba(0,0,0,0.2);margin-bottom:12px;}
-.io-card-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.io-card-title{font-size:25px;font-weight:700;color:#fff;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .io-card-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:14px;line-height:1.5;}
 .io-btn{width:100%;padding:13px;font-size:14px;font-weight:600;border:none;border-radius:10px;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .2s;}
 .io-btn:active{opacity:.85;}
@@ -293,9 +295,10 @@ option{background:#2a3345;color:#fff;}
   .cal-wrap{padding:20px 32px;}
   .cal-nav .arrow{padding:10px 20px;font-size:18px;}
   .cal-nav .month-title{font-size:22px;}
-  .legend{gap:10px;margin-bottom:14px;}
-  .legend-item{font-size:13px;}
-  .legend-dot{width:20px;height:20px;font-size:12px;}
+  .legend{gap:8px;margin-bottom:16px;}
+  .legend-item{font-size:16px;}
+  .legend-dot{width:26px;height:26px;font-size:17px;}
+  .legend-dir{font-size:16px;}
   .cal-dow{padding:12px 0;font-size:16px;letter-spacing:1px;}
   .cal-day{height:150px;padding:6px 5px 4px;}
   .day-num{font-size:18px;width:32px;height:32px;}
@@ -322,7 +325,7 @@ option{background:#2a3345;color:#fff;}
   .edit-save,.edit-cancel{font-size:16px;padding:15px;}
   .stats-wrap{padding:24px 32px;}
   .filter-card{padding:18px 22px;}
-  .filter-title{font-size:16px;}
+  .filter-title{font-size:25px;}
   .date-row label{font-size:15px;min-width:40px;}
   .date-row input,.date-row select{font-size:15px;padding:10px 12px;}
   .quick-btn{font-size:13px;padding:7px 14px;}
@@ -331,15 +334,15 @@ option{background:#2a3345;color:#fff;}
   .mode-stat-label{font-size:14px;}
   .mode-stat-count{font-size:22px;}
   .mode-stat-icon{font-size:24px;width:36px;}
-  .chart-title{font-size:16px;}
-  .chart-legend{font-size:12px;}
+  .chart-title{font-size:25px;}
+  .chart-legend{font-size:14px;}
   .bar-chart{height:250px;padding-top:32px;}
   .bar-val{font-size:14px;}
   .bar-lbl{font-size:20px;}
   .ref-label{font-size:13px;}
   .io-wrap{padding:24px 32px;}
   .io-card{padding:20px 24px;}
-  .io-card-title{font-size:17px;}
+  .io-card-title{font-size:25px;}
   .io-card-sub{font-size:14px;}
   .io-btn{font-size:16px;padding:15px;}
   .drop-zone p{font-size:15px;}
@@ -352,7 +355,7 @@ option{background:#2a3345;color:#fff;}
   .section-label{font-size:15px;}
   .mode-stat-title{font-size:15px;}
   .chart-title{font-size:15px;}
-  .io-card-title{font-size:17px;}
+  .io-card-title{font-size:25px;}
 }
 </style>
 </head>
@@ -454,13 +457,17 @@ option{background:#2a3345;color:#fff;}
     <button class="arrow" onclick="changeCalMonth(1)">▶</button>
   </div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#FFF3EE">🚄</div>高鐵</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#FFFBEB">🚕</div>高+計</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#EFF6FF">🚗</div>私家車</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#F0FDF4">🚐</div>公務車</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#F5F3FF">🏠</div>WFH</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#FDF2F8">🌴</div>放假</div>
-    <div class="legend-item" style="margin-left:2px;font-size:9px">⬅上班 下班➡</div>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="background:#FFF3EE">🚄</div>高鐵</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FFFBEB">🚕</div>高+計</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#EFF6FF">🚗</div>私家車</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#F0FDF4">🚐</div>公務車</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#F5F3FF">🏠</div>WFH</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FDF2F8">🌴</div>放假</div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-dir">⬅ 上班 / 下班 ➡</div>
+    </div>
   </div>
   <div class="cal-grid">
     <div class="cal-header">
