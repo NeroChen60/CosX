@@ -99,6 +99,33 @@ body{font-family:-apple-system,'PingFang TC',sans-serif;background:var(--light);
 .day-loc{font-size:7px;color:var(--teal);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;}
 .day-hours{font-size:7px;color:var(--amber);text-align:center;font-weight:600;line-height:1.4;}
 
+/* EDIT MODAL */
+.edit-modal{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px;padding-bottom:calc(20px + var(--safe-bottom));max-height:85dvh;overflow-y:auto;}
+.edit-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px;}
+.edit-field{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);gap:10px;}
+.edit-field:last-child{border-bottom:none;}
+.edit-field label{font-size:13px;color:var(--gray);min-width:72px;flex-shrink:0;}
+.edit-field select,.edit-field input{flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent;font-family:inherit;text-align:right;}
+.edit-time-wrap{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
+.edit-time-col{display:flex;flex-direction:column;align-items:center;}
+.edit-time-lbl{font-size:10px;color:var(--sub);margin-bottom:2px;}
+.edit-time-hl{position:relative;}
+.edit-time-hl::after{content:'';position:absolute;top:50%;left:0;right:0;height:40px;transform:translateY(-50%);border-top:1.5px solid var(--border);border-bottom:1.5px solid var(--border);pointer-events:none;border-radius:4px;background:rgba(0,102,204,0.05);}
+.edit-time-scroll{height:120px;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;width:52px;scrollbar-width:none;}
+.edit-time-scroll::-webkit-scrollbar{display:none;}
+.edit-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px;}
+.edit-mode-btn{border:2px solid var(--border);border-radius:10px;padding:8px 4px;text-align:center;cursor:pointer;background:var(--white);font-size:11px;}
+.edit-mode-btn .em{font-size:18px;display:block;margin-bottom:2px;}
+.edit-mode-btn.sel-hsr{border-color:#E8530A;background:#FFF3EE;}
+.edit-mode-btn.sel-hsr-taxi{border-color:#D97706;background:#FFFBEB;}
+.edit-mode-btn.sel-car{border-color:#2563EB;background:#EFF6FF;}
+.edit-mode-btn.sel-govt{border-color:#16A34A;background:#F0FDF4;}
+.edit-mode-btn.sel-wfh{border-color:#7C3AED;background:#F5F3FF;}
+.edit-mode-btn.sel-holiday{border-color:#DB2777;background:#FDF2F8;}
+.edit-actions{display:flex;gap:8px;margin-top:14px;}
+.edit-save{flex:2;padding:13px;background:var(--blue);color:#fff;font-size:14px;font-weight:700;border:none;border-radius:10px;cursor:pointer;}
+.edit-cancel{flex:1;padding:13px;background:var(--light);color:var(--gray);font-size:14px;font-weight:600;border:none;border-radius:10px;cursor:pointer;}
+
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:none;align-items:flex-end;}
 .modal-bg.open{display:flex;}
@@ -461,6 +488,59 @@ body{font-family:-apple-system,'PingFang TC',sans-serif;background:var(--light);
   <div class="nav-item" id="nav-settings" onclick="goPage('settings')"><span class="ni">📍</span>地點</div>
 </div>
 
+<!-- EDIT MODAL -->
+<div class="modal-bg" id="editModalBg" onclick="closeEditModal(event)">
+  <div class="edit-modal">
+    <div class="modal-handle"></div>
+    <div class="edit-title" id="editTitle">編輯記錄</div>
+    <div style="background:var(--light);border-radius:12px;padding:4px 14px 10px;">
+      <div class="edit-field">
+        <label>方向</label>
+        <select id="e-direction" onchange="onEditDirectionChange()">
+          <option value="上班">上班</option>
+          <option value="下班">下班</option>
+        </select>
+      </div>
+      <div class="edit-field">
+        <label id="eTimeLabel">時間</label>
+        <div class="edit-time-wrap">
+          <div class="edit-time-col">
+            <div class="edit-time-lbl">時</div>
+            <div class="edit-time-hl">
+              <div class="edit-time-scroll time-item-container" id="eHourScroll"></div>
+            </div>
+          </div>
+          <div class="time-sep">:</div>
+          <div class="edit-time-col">
+            <div class="edit-time-lbl">分</div>
+            <div class="edit-time-hl">
+              <div class="edit-time-scroll time-item-container" id="eMinScroll"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="edit-field">
+        <label>出差地點</label>
+        <select id="e-location">
+          <option value="">（不選）</option>
+        </select>
+      </div>
+      <div class="edit-field" style="border-bottom:none">
+        <label>備註</label>
+        <input type="text" id="e-note" placeholder="備注...">
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <div style="font-size:12px;font-weight:600;color:var(--sub);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.6px;">通勤方式</div>
+      <div class="edit-mode-grid" id="editModeGrid"></div>
+    </div>
+    <div class="edit-actions">
+      <button class="edit-cancel" onclick="closeEditModal()">取消</button>
+      <button class="edit-save" onclick="saveEdit()">✅ 儲存修改</button>
+    </div>
+  </div>
+</div>
+
 <!-- DAY MODAL -->
 <div class="modal-bg" id="modalBg" onclick="closeModal(event)">
   <div class="modal">
@@ -535,38 +615,42 @@ const MINS=['00','15','30','45'];
 function initTimePicker(){
   const hs=document.getElementById('hourScroll');
   const ms=document.getElementById('minScroll');
-  const pad='<div class="time-item" style="opacity:0">--</div><div class="time-item" style="opacity:0">--</div>';
-  hs.innerHTML=pad+HOURS.map(h=>`<div class="time-item">${h}</div>`).join('')+pad;
-  ms.innerHTML=pad+MINS.map(m=>`<div class="time-item">${m}</div>`).join('')+pad;
-  // default 09:00 (上班)
+  const pad='<div class="time-item" style="opacity:0;pointer-events:none" data-val="">--</div><div class="time-item" style="opacity:0;pointer-events:none" data-val="">--</div>';
+  hs.innerHTML=pad+HOURS.map(h=>`<div class="time-item" data-val="${h}">${h}</div>`).join('')+pad;
+  ms.innerHTML=pad+MINS.map(m=>`<div class="time-item" data-val="${m}">${m}</div>`).join('')+pad;
+  // default 09:00 for 上班
   setTimeout(()=>{ scrollToTime(9,0); },100);
   hs.addEventListener('scroll',()=>highlightVisible(hs),{passive:true});
   ms.addEventListener('scroll',()=>highlightVisible(ms),{passive:true});
 }
 
 function scrollToTime(h,mIdx){
+  // h = hour integer (0-23), mIdx = minute index (0=00,1=15,2=30,3=45)
   const hs=document.getElementById('hourScroll');
   const ms=document.getElementById('minScroll');
+  // each item is 40px; padding adds 2 items before real items
   hs.scrollTop=(h+2)*40;
   ms.scrollTop=(mIdx+2)*40;
-  setTimeout(()=>{highlightVisible(hs);highlightVisible(ms);},50);
+  setTimeout(()=>{highlightVisible(hs);highlightVisible(ms);},60);
 }
 
 function highlightVisible(el){
+  // center of the visible window
   const mid=el.scrollTop+el.offsetHeight/2;
   el.querySelectorAll('.time-item').forEach(item=>{
-    const top=item.offsetTop;
-    item.classList.toggle('selected',Math.abs(top+20-mid)<22);
+    const itemMid=item.offsetTop+20; // 20 = half of 40px item
+    item.classList.toggle('selected',Math.abs(itemMid-mid)<20);
   });
 }
 
 function getPickedTime(){
   const hs=document.getElementById('hourScroll');
   const ms=document.getElementById('minScroll');
-  const hIdx=Math.round(hs.scrollTop/40);
-  const mIdx=Math.round(ms.scrollTop/40);
-  const h=HOURS[Math.max(0,Math.min(hIdx-2,23))];
-  const m=MINS[Math.max(0,Math.min(mIdx-2,3))];
+  // read from the .selected element's data-val
+  const hEl=hs.querySelector('.time-item.selected');
+  const mEl=ms.querySelector('.time-item.selected');
+  const h=hEl&&hEl.dataset.val?hEl.dataset.val:'09';
+  const m=mEl&&mEl.dataset.val?mEl.dataset.val:'00';
   return `${h}:${m}`;
 }
 
@@ -756,6 +840,7 @@ function openDayModal(dateStr){
           <div class="m-mode">${r.direction}　${meta.label}</div>
           ${parts.length?`<div class="m-sub">${parts.join('　')}</div>`:''}
         </div>
+        <button style="background:none;border:none;font-size:17px;cursor:pointer;padding:4px;color:var(--blue)" onclick="openEditModal(${r.id})">✏️</button>
         <button class="modal-del" onclick="deleteFromModal(${r.id})">🗑</button>
       </div>`;
     }).join('');
@@ -844,10 +929,19 @@ function renderHoursStats(){
   // per date hours
   const dayHours=[];
   dates.forEach(ds=>{
-    let dayRecs=records.filter(r=>r.date===ds);
-    if(loc) dayRecs=dayRecs.filter(r=>r.location===loc);
-    const go=dayRecs.find(r=>r.direction==='上班'&&r.time);
-    const bk=dayRecs.find(r=>r.direction==='下班'&&r.time);
+    // all records on this date
+    const allDayRecs=records.filter(r=>r.date===ds);
+
+    // if location filter is set: only include this date if at least one record matches the location
+    if(loc){
+      const hasLoc=allDayRecs.some(r=>r.location===loc);
+      if(!hasLoc) return;
+    }
+
+    // find go/back from ALL records of this date (not filtered by loc)
+    // so that paired times are always matched correctly
+    const go=allDayRecs.find(r=>r.direction==='上班'&&r.time);
+    const bk=allDayRecs.find(r=>r.direction==='下班'&&r.time);
     if(go&&bk){
       const [gh,gm]=go.time.split(':').map(Number);
       const [bh,bm]=bk.time.split(':').map(Number);
@@ -1005,6 +1099,127 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   });
 });
+
+// ── EDIT MODAL ──
+let editingId=null;
+let editMode=null;
+
+function initEditTimePicker(h, mVal){
+  ['eHourScroll','eMinScroll'].forEach(id=>{
+    const el=document.getElementById(id);
+    const isHour=(id==='eHourScroll');
+    const items=isHour?HOURS:MINS;
+    const pad='<div class="time-item" style="opacity:0;pointer-events:none" data-val="">--</div><div class="time-item" style="opacity:0;pointer-events:none" data-val="">--</div>';
+    el.innerHTML=pad+items.map(v=>`<div class="time-item" data-val="${v}">${v}</div>`).join('')+pad;
+    el.addEventListener('scroll',()=>highlightVisible(el),{passive:true});
+  });
+  // scroll to given time
+  const hs=document.getElementById('eHourScroll');
+  const ms=document.getElementById('eMinScroll');
+  const mIdx=MINS.indexOf(mVal)>=0?MINS.indexOf(mVal):0;
+  setTimeout(()=>{
+    hs.scrollTop=(h+2)*40;
+    ms.scrollTop=(mIdx+2)*40;
+    highlightVisible(hs);
+    highlightVisible(ms);
+  },80);
+}
+
+function getEditPickedTime(){
+  const hEl=document.getElementById('eHourScroll').querySelector('.time-item.selected');
+  const mEl=document.getElementById('eMinScroll').querySelector('.time-item.selected');
+  const h=hEl&&hEl.dataset.val?hEl.dataset.val:'09';
+  const m=mEl&&mEl.dataset.val?mEl.dataset.val:'00';
+  return `${h}:${m}`;
+}
+
+function onEditDirectionChange(){
+  const dir=document.getElementById('e-direction').value;
+  document.getElementById('eTimeLabel').textContent=dir==='上班'?'上班時間':'下班時間';
+}
+
+function openEditModal(id){
+  const rec=records.find(r=>r.id===id);
+  if(!rec) return;
+  editingId=id;
+  editMode=rec.mode;
+
+  document.getElementById('editModalBg').classList.add('open');
+  document.getElementById('editTitle').textContent=`編輯：${rec.date.replace(/-/g,'/')} ${rec.direction}`;
+  document.getElementById('e-direction').value=rec.direction;
+  document.getElementById('eTimeLabel').textContent=rec.direction==='上班'?'上班時間':'下班時間';
+  document.getElementById('e-note').value=rec.note||'';
+
+  // location select
+  const locSel=document.getElementById('e-location');
+  locSel.innerHTML='<option value="">（不選）</option>';
+  locations.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;locSel.appendChild(o);});
+  locSel.value=rec.location||'';
+
+  // mode grid
+  document.getElementById('editModeGrid').innerHTML=Object.entries(MODE_META).map(([k,meta])=>
+    `<div class="edit-mode-btn${editMode===k?' sel-'+k:''}" data-mode="${k}" onclick="selectEditMode('${k}')">
+      <span class="em">${meta.icon}</span>${meta.label}
+    </div>`
+  ).join('');
+
+  // time picker
+  const timeParts=(rec.time||'09:00').split(':');
+  const h=parseInt(timeParts[0])||9;
+  const mVal=timeParts[1]||'00';
+  initEditTimePicker(h, mVal);
+}
+
+function selectEditMode(mode){
+  editMode=mode;
+  document.querySelectorAll('#editModeGrid .edit-mode-btn').forEach(b=>{
+    b.className='edit-mode-btn'+(b.dataset.mode===mode?' sel-'+mode:'');
+  });
+}
+
+function closeEditModal(e){
+  if(!e||e.target===document.getElementById('editModalBg'))
+    document.getElementById('editModalBg').classList.remove('open');
+}
+
+function saveEdit(){
+  const rec=records.find(r=>r.id===editingId);
+  if(!rec) return;
+  const newDir=document.getElementById('e-direction').value;
+  const newTime=getEditPickedTime();
+  const newLoc=document.getElementById('e-location').value;
+  const newNote=document.getElementById('e-note').value.trim();
+
+  // validate time order
+  if(newDir==='下班'){
+    const goRec=records.find(r=>r.date===rec.date&&r.direction==='上班'&&r.time&&r.id!==editingId);
+    if(goRec){
+      const [gh,gm]=goRec.time.split(':').map(Number);
+      const [bh,bm]=newTime.split(':').map(Number);
+      if(bh*60+bm<=gh*60+gm){showToast(`❌ 下班時間不能早於上班時間（${goRec.time}）`);return;}
+    }
+  }
+  if(newDir==='上班'){
+    const bkRec=records.find(r=>r.date===rec.date&&r.direction==='下班'&&r.time&&r.id!==editingId);
+    if(bkRec){
+      const [bh,bm]=bkRec.time.split(':').map(Number);
+      const [gh,gm]=newTime.split(':').map(Number);
+      if(gh*60+gm>=bh*60+bm){showToast(`❌ 上班時間不能晚於下班時間（${bkRec.time}）`);return;}
+    }
+  }
+
+  rec.direction=newDir;
+  rec.time=newTime;
+  rec.location=newLoc;
+  rec.note=newNote;
+  rec.mode=editMode||rec.mode;
+
+  saveData();
+  document.getElementById('editModalBg').classList.remove('open');
+  openDayModal(rec.date); // refresh day modal
+  renderCal();
+  showToast('✅ 記錄已更新');
+}
 
 function showToast(msg){
   const t=document.getElementById('toast');
