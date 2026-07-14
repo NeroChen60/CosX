@@ -210,14 +210,14 @@ option{background:#2a3345;color:#fff;}
 .chart-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:8px;}
 .chart-legend{font-size:10px;color:rgba(239,68,68,0.8);margin-bottom:10px;}
 .bar-chart-wrap{position:relative;width:100%;}
-.bar-chart{display:flex;align-items:flex-end;gap:2px;height:160px;width:100%;overflow:hidden;}
+.bar-chart{display:flex;align-items:flex-end;gap:2px;height:160px;width:100%;overflow:visible;padding-top:22px;}
 .bar-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;}
 .bar-fill{width:100%;border-radius:3px 3px 0 0;min-height:2px;transition:height .3s;}
-.bar-fill.over8{background:#E8530A;}
+.bar-fill.over8{background:#F97B3A;}
 .bar-fill.under8{background:#0EA5E9;}
 .bar-val{font-size:7px;color:rgba(255,255,255,0.6);font-weight:600;white-space:nowrap;}
 .bar-lbl{font-size:7px;color:rgba(255,255,255,0.4);white-space:nowrap;}
-.ref-line{position:absolute;left:0;right:0;border-top:1.5px dashed rgba(239,68,68,0.6);pointer-events:none;}
+.ref-line{position:absolute;left:0;right:0;border-top:2.5px dashed rgba(239,68,68,0.85);pointer-events:none;}
 .ref-label{position:absolute;right:0;font-size:9px;color:#EF4444;font-weight:700;background:rgba(40,50,65,0.95);padding:0 3px;transform:translateY(-100%);}
 
 /* ── EXPORT / IMPORT ── */
@@ -333,7 +333,7 @@ option{background:#2a3345;color:#fff;}
   .mode-stat-icon{font-size:24px;width:36px;}
   .chart-title{font-size:16px;}
   .chart-legend{font-size:12px;}
-  .bar-chart{height:220px;}
+  .bar-chart{height:220px;padding-top:26px;}
   .bar-val{font-size:10px;}
   .bar-lbl{font-size:10px;}
   .ref-label{font-size:11px;}
@@ -1117,17 +1117,19 @@ function renderHoursStats(){
   }
 
   // 5b: 8h baseline
-  const CHART_H=160; // px (matches CSS)
+  const CHART_H=160; // drawable height in px (CSS height minus padding-top 22px = 138px actual bars)
+  const BAR_AREA=138; // 160 - 22 padding-top
   const REF_MINS=8*60; // 480 min
-  const maxM=Math.max(...chartData.map(d=>d.mins), REF_MINS+1);
-  // ref line position from bottom (px from bottom of chart area)
-  const refPx=Math.round(REF_MINS/maxM*CHART_H);
+  // Add 15% headroom above the tallest bar so labels aren't clipped
+  const maxM=Math.max(...chartData.map(d=>d.mins), REF_MINS) * 1.15;
+  // ref line position from bottom of bar-area
+  const refPx=Math.round(REF_MINS/maxM*BAR_AREA);
   refLine.style.display='block';
   refLine.style.bottom=refPx+'px';
 
-  // 5c: bars fill full width — flex:1 handles it via CSS, no min-width needed
+  // 5c: bars fill full width
   chart.innerHTML=chartData.map(d=>{
-    const barH=Math.max(Math.round(d.mins/maxM*CHART_H),2);
+    const barH=Math.max(Math.round(d.mins/maxM*BAR_AREA),2);
     const lbl=d.date.slice(5).replace('-','/');
     const val=fmtH(d.mins);
     const over=d.mins>REF_MINS;
