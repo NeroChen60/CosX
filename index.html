@@ -5,138 +5,187 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>通勤記錄</title>
+<title>工作紀錄</title>
 <style>
-  :root {
-    --navy:#1A2F5E; --blue:#0066CC; --teal:#00A8B5;
-    --green:#16A34A; --amber:#D97706; --red:#DC2626;
-    --gray:#64748B; --light:#F4F7FB; --white:#FFFFFF;
-    --border:#E2E8F0; --text:#1E293B; --sub:#94A3B8;
-    --r:14px; --safe-bottom:env(safe-area-inset-bottom,20px);
-  }
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  body{font-family:-apple-system,'PingFang TC',sans-serif;background:var(--light);color:var(--text);min-height:100dvh;overflow-x:hidden;}
+:root{
+  --navy:#1A2F5E;--blue:#0066CC;--teal:#00A8B5;
+  --green:#16A34A;--amber:#D97706;--red:#DC2626;--purple:#7C3AED;
+  --gray:#64748B;--light:#F4F7FB;--white:#FFFFFF;
+  --border:#E2E8F0;--text:#1E293B;--sub:#94A3B8;
+  --r:14px;--safe-bottom:env(safe-area-inset-bottom,20px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,'PingFang TC',sans-serif;background:var(--light);color:var(--text);min-height:100dvh;overflow-x:hidden;}
 
-  .topbar{background:var(--navy);color:#fff;padding:52px 20px 16px;display:flex;align-items:flex-end;justify-content:space-between;}
-  .topbar h1{font-size:22px;font-weight:700;}
-  .topbar .sub{font-size:12px;color:var(--teal);margin-top:2px;}
-  .stat-box{background:rgba(255,255,255,0.1);border-radius:10px;padding:6px 14px;text-align:right;}
-  .stat-num{font-size:22px;font-weight:800;color:var(--teal);}
-  .stat-label{font-size:10px;color:rgba(255,255,255,0.6);}
+.topbar{background:var(--navy);color:#fff;padding:52px 20px 16px;display:flex;align-items:flex-end;justify-content:space-between;}
+.topbar h1{font-size:22px;font-weight:700;}
+.topbar .sub{font-size:12px;color:var(--teal);margin-top:2px;}
+.stat-box{background:rgba(255,255,255,0.1);border-radius:10px;padding:6px 14px;text-align:right;}
+.stat-num{font-size:22px;font-weight:800;color:var(--teal);}
+.stat-label{font-size:10px;color:rgba(255,255,255,0.6);}
 
-  .page{display:none;} .page.active{display:block;}
-  .page-content{padding-bottom:calc(70px + var(--safe-bottom));}
+.page{display:none;}.page.active{display:block;}
+.page-content{padding-bottom:calc(70px + var(--safe-bottom));}
 
-  .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:100;}
-  .nav-item{flex:1;padding:10px 4px 6px;text-align:center;cursor:pointer;color:var(--sub);font-size:10px;transition:color .15s;}
-  .nav-item .ni{font-size:22px;display:block;line-height:1.2;}
-  .nav-item.active{color:var(--blue);}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:100;}
+.nav-item{flex:1;padding:8px 2px 5px;text-align:center;cursor:pointer;color:var(--sub);font-size:9px;transition:color .15s;}
+.nav-item .ni{font-size:20px;display:block;line-height:1.3;}
+.nav-item.active{color:var(--blue);}
 
-  /* FORM */
-  .form-wrap{padding:16px;}
-  .section-label{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:0.8px;margin:20px 0 8px;}
-  .card{background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-  .field{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);gap:10px;}
-  .field:last-child{border-bottom:none;}
-  .field label{font-size:14px;color:var(--text);min-width:72px;flex-shrink:0;}
-  .field input,.field select,.field textarea{flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent;font-family:inherit;text-align:right;}
-  .field textarea{text-align:left;resize:none;height:60px;}
+/* FORM */
+.form-wrap{padding:16px;}
+.section-label{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:0.8px;margin:18px 0 8px;}
+.card{background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.field{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border);gap:10px;}
+.field:last-child{border-bottom:none;}
+.field label{font-size:14px;color:var(--text);min-width:76px;flex-shrink:0;}
+.field input,.field select,.field textarea{flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent;font-family:inherit;text-align:right;}
+.field textarea{text-align:left;resize:none;height:55px;}
 
-  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .mode-btn{border:2px solid var(--border);border-radius:var(--r);padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s;background:var(--white);}
-  .mode-btn .icon{font-size:26px;margin-bottom:6px;}
-  .mode-btn .name{font-size:13px;font-weight:600;color:var(--text);}
-  .mode-btn .detail{font-size:10px;color:var(--sub);margin-top:2px;}
-  .mode-btn.sel-hsr{border-color:#E8530A;background:#FFF3EE;}
-  .mode-btn.sel-hsr-taxi{border-color:#D97706;background:#FFFBEB;}
-  .mode-btn.sel-car{border-color:#2563EB;background:#EFF6FF;}
-  .mode-btn.sel-govt{border-color:#16A34A;background:#F0FDF4;}
+/* TIME PICKER WHEEL */
+.time-picker-wrap{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
+.time-col{display:flex;flex-direction:column;align-items:center;gap:0;}
+.time-scroll{height:120px;overflow-y:scroll;scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;width:52px;scrollbar-width:none;}
+.time-scroll::-webkit-scrollbar{display:none;}
+.time-item{height:40px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;scroll-snap-align:center;color:var(--sub);transition:color .1s;flex-shrink:0;}
+.time-item.selected{color:var(--navy);}
+.time-label{font-size:10px;color:var(--sub);margin-bottom:2px;}
+.time-sep{font-size:22px;font-weight:700;color:var(--navy);margin:0 2px;padding-top:10px;}
+.time-highlight{position:relative;}
+.time-highlight::after{content:'';position:absolute;top:50%;left:0;right:0;height:40px;transform:translateY(-50%);border-top:1.5px solid var(--border);border-bottom:1.5px solid var(--border);pointer-events:none;border-radius:4px;background:rgba(0,102,204,0.05);}
 
-  .btn-submit{width:100%;padding:16px;background:var(--blue);color:#fff;font-size:16px;font-weight:700;border:none;border-radius:var(--r);margin-top:24px;margin-bottom:calc(16px + var(--safe-bottom));cursor:pointer;}
-  .btn-submit:active{opacity:.85;}
+/* MODE GRID */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.mode-btn{border:2px solid var(--border);border-radius:12px;padding:11px 8px;text-align:center;cursor:pointer;transition:all .15s;background:var(--white);}
+.mode-btn .icon{font-size:22px;margin-bottom:4px;}
+.mode-btn .name{font-size:12px;font-weight:600;color:var(--text);}
+.mode-btn .detail{font-size:9px;color:var(--sub);margin-top:1px;}
+.mode-btn.sel-hsr{border-color:#E8530A;background:#FFF3EE;}
+.mode-btn.sel-hsr-taxi{border-color:#D97706;background:#FFFBEB;}
+.mode-btn.sel-car{border-color:#2563EB;background:#EFF6FF;}
+.mode-btn.sel-govt{border-color:#16A34A;background:#F0FDF4;}
+.mode-btn.sel-wfh{border-color:#7C3AED;background:#F5F3FF;}
+.mode-btn.sel-holiday{border-color:#DB2777;background:#FDF2F8;}
 
-  /* CALENDAR */
-  .cal-wrap{padding:16px;}
-  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-  .cal-nav .arrow{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:8px 16px;cursor:pointer;font-size:16px;color:var(--navy);}
-  .cal-nav .month-title{font-size:17px;font-weight:700;color:var(--navy);}
-  .legend{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
-  .legend-item{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--gray);}
-  .legend-dot{width:16px;height:16px;border-radius:3px;font-size:9px;display:flex;align-items:center;justify-content:center;}
-  .cal-grid{background:var(--white);border-radius:var(--r);box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;}
-  .cal-header{display:grid;grid-template-columns:repeat(7,1fr);background:var(--navy);}
-  .cal-dow{text-align:center;padding:10px 0;font-size:11px;font-weight:600;color:rgba(255,255,255,0.7);}
-  .cal-dow:first-child{color:#FF8A80;} .cal-dow:last-child{color:#80D8FF;}
-  .cal-days{display:grid;grid-template-columns:repeat(7,1fr);}
-  .cal-day{min-height:64px;padding:5px 3px 3px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;position:relative;}
-  .cal-day:nth-child(7n){border-right:none;}
-  .cal-day.empty{background:#FAFBFC;cursor:default;}
-  .cal-day.today .day-num{background:var(--blue);color:#fff;border-radius:50%;}
-  .cal-day.sunday .day-num{color:var(--red);}
-  .cal-day.saturday .day-num{color:var(--blue);}
-  .day-num{font-size:12px;font-weight:600;width:22px;height:22px;display:flex;align-items:center;justify-content:center;margin:0 auto 3px;}
-  /* 上班左 下班右 */
-  .day-row{display:flex;justify-content:space-between;align-items:center;min-height:16px;margin-top:1px;}
-  .day-dot{width:16px;height:16px;border-radius:3px;font-size:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .day-dot.empty-slot{width:16px;height:16px;}
+.btn-submit{width:100%;padding:15px;background:var(--blue);color:#fff;font-size:16px;font-weight:700;border:none;border-radius:var(--r);margin-top:20px;margin-bottom:calc(16px + var(--safe-bottom));cursor:pointer;}
+.btn-submit:active{opacity:.85;}
 
-  /* MODAL */
-  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:none;align-items:flex-end;}
-  .modal-bg.open{display:flex;}
-  .modal{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px;padding-bottom:calc(20px + var(--safe-bottom));max-height:75dvh;overflow-y:auto;}
-  .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
-  .modal-date{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:14px;}
-  .modal-rec{display:flex;align-items:center;gap:10px;padding:12px;background:var(--light);border-radius:10px;margin-bottom:8px;}
-  .modal-rec .m-icon{font-size:22px;}
-  .modal-rec .m-info{flex:1;}
-  .modal-rec .m-mode{font-size:13px;font-weight:600;color:var(--text);}
-  .modal-rec .m-sub{font-size:11px;color:var(--gray);margin-top:2px;}
-  .modal-del{background:none;border:none;font-size:18px;color:var(--sub);cursor:pointer;padding:4px;}
-  .modal-empty{text-align:center;padding:30px;color:var(--sub);font-size:14px;}
-  .modal-add{width:100%;padding:13px;background:var(--blue);color:#fff;font-size:14px;font-weight:600;border:none;border-radius:10px;margin-top:10px;cursor:pointer;}
+/* CALENDAR */
+.cal-wrap{padding:14px;}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-nav .arrow{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:15px;color:var(--navy);}
+.cal-nav .month-title{font-size:16px;font-weight:700;color:var(--navy);}
+.legend{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.legend-item{display:flex;align-items:center;gap:2px;font-size:9px;color:var(--gray);}
+.legend-dot{width:14px;height:14px;border-radius:3px;font-size:8px;display:flex;align-items:center;justify-content:center;}
+.cal-grid{background:var(--white);border-radius:var(--r);box-shadow:0 1px 4px rgba(0,0,0,.06);overflow:hidden;}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);background:var(--navy);}
+.cal-dow{text-align:center;padding:8px 0;font-size:10px;font-weight:600;color:rgba(255,255,255,0.7);}
+.cal-dow:first-child{color:#FF8A80;}.cal-dow:last-child{color:#80D8FF;}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-day{height:80px;padding:4px 3px 3px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);cursor:pointer;overflow:hidden;}
+.cal-day:nth-child(7n){border-right:none;}
+.cal-day.empty{background:#FAFBFC;cursor:default;}
+.cal-day.today .day-num{background:var(--blue);color:#fff;border-radius:50%;}
+.cal-day.sunday .day-num{color:var(--red);}
+.cal-day.saturday .day-num{color:var(--blue);}
+.day-num{font-size:11px;font-weight:600;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;}
+.day-row{display:flex;justify-content:space-between;align-items:center;margin-top:1px;}
+.day-dot{width:14px;height:14px;border-radius:3px;font-size:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.day-dot.empty-slot{width:14px;height:14px;}
+.day-loc{font-size:7px;color:var(--teal);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+.day-hours{font-size:7px;color:var(--amber);text-align:center;font-weight:600;}
 
-  /* STATS */
-  .stats-wrap{padding:16px;}
-  .date-range-card{background:var(--white);border-radius:var(--r);padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:14px;}
-  .date-range-title{font-size:12px;font-weight:600;color:var(--sub);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.6px;}
-  .date-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
-  .date-row label{font-size:13px;color:var(--gray);min-width:36px;}
-  .date-row input{flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;font-family:inherit;}
-  .quick-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
-  .quick-btn{padding:6px 12px;border-radius:16px;font-size:11px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--gray);cursor:pointer;}
-  .quick-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
-  .stats-total{background:var(--white);border-radius:var(--r);padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:14px;}
-  .stats-total-num{font-size:32px;font-weight:800;color:var(--blue);}
-  .stats-total-label{font-size:12px;color:var(--sub);margin-top:2px;}
-  .mode-stat-card{background:var(--white);border-radius:var(--r);padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px;}
-  .mode-stat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  .mode-stat-row:last-child{margin-bottom:0;}
-  .mode-stat-icon{font-size:22px;width:36px;text-align:center;}
-  .mode-stat-info{flex:1;}
-  .mode-stat-label{font-size:13px;font-weight:600;color:var(--text);}
-  .mode-stat-bar{height:7px;background:var(--border);border-radius:4px;margin-top:4px;overflow:hidden;}
-  .mode-stat-fill{height:100%;border-radius:4px;transition:width .4s;}
-  .mode-stat-count{font-size:18px;font-weight:800;min-width:32px;text-align:right;}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:none;align-items:flex-end;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--white);border-radius:20px 20px 0 0;width:100%;padding:20px;padding-bottom:calc(20px + var(--safe-bottom));max-height:78dvh;overflow-y:auto;}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 14px;}
+.modal-date{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:12px;}
+.modal-rec{display:flex;align-items:flex-start;gap:10px;padding:11px;background:var(--light);border-radius:10px;margin-bottom:8px;}
+.modal-rec .m-icon{font-size:20px;margin-top:1px;}
+.modal-rec .m-info{flex:1;}
+.modal-rec .m-mode{font-size:13px;font-weight:600;color:var(--text);}
+.modal-rec .m-sub{font-size:11px;color:var(--gray);margin-top:2px;line-height:1.5;}
+.modal-del{background:none;border:none;font-size:17px;color:var(--sub);cursor:pointer;padding:4px;flex-shrink:0;}
+.modal-empty{text-align:center;padding:28px;color:var(--sub);font-size:14px;}
+.modal-add{width:100%;padding:13px;background:var(--blue);color:#fff;font-size:14px;font-weight:600;border:none;border-radius:10px;margin-top:10px;cursor:pointer;}
 
-  /* SETTINGS (locations) */
-  .settings-wrap{padding:16px;}
-  .loc-list{background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:12px;}
-  .loc-item{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border);gap:10px;}
-  .loc-item:last-child{border-bottom:none;}
-  .loc-name{flex:1;font-size:14px;color:var(--text);}
-  .loc-del{background:none;border:none;font-size:18px;color:var(--sub);cursor:pointer;padding:4px;}
-  .loc-add-row{display:flex;gap:8px;}
-  .loc-input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--text);outline:none;font-family:inherit;background:var(--white);}
-  .loc-input:focus{border-color:var(--blue);}
-  .loc-add-btn{padding:12px 18px;background:var(--blue);color:#fff;font-size:14px;font-weight:600;border:none;border-radius:10px;cursor:pointer;}
+/* STATS / HOURS */
+.stats-wrap{padding:14px;}
+.filter-card{background:var(--white);border-radius:var(--r);padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:12px;}
+.filter-title{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;}
+.date-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.date-row label{font-size:13px;color:var(--gray);min-width:32px;}
+.date-row input,.date-row select{flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none;font-family:inherit;background:var(--white);}
+.quick-btns{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.quick-btn{padding:5px 10px;border-radius:14px;font-size:11px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--gray);cursor:pointer;}
+.quick-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.summary-card{background:var(--white);border-radius:var(--r);padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.summary-card.full{grid-column:1/-1;}
+.summary-num{font-size:26px;font-weight:800;}
+.summary-label{font-size:11px;color:var(--sub);margin-top:2px;}
+.mode-stat-card{background:var(--white);border-radius:var(--r);padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px;}
+.mode-stat-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;}
+.mode-stat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.mode-stat-row:last-child{margin-bottom:0;}
+.mode-stat-icon{font-size:20px;width:30px;text-align:center;}
+.mode-stat-info{flex:1;}
+.mode-stat-label{font-size:12px;font-weight:600;color:var(--text);}
+.mode-stat-bar{height:6px;background:var(--border);border-radius:3px;margin-top:3px;overflow:hidden;}
+.mode-stat-fill{height:100%;border-radius:3px;transition:width .4s;}
+.mode-stat-count{font-size:17px;font-weight:800;min-width:28px;text-align:right;}
 
-  /* TOAST */
-  .toast{position:fixed;bottom:calc(80px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;white-space:nowrap;z-index:999;pointer-events:none;}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* BAR CHART */
+.chart-card{background:var(--white);border-radius:var(--r);padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px;}
+.chart-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:140px;overflow-x:auto;padding-bottom:4px;}
+.bar-chart::-webkit-scrollbar{display:none;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;min-width:32px;}
+.bar-fill{width:24px;border-radius:4px 4px 0 0;background:var(--blue);min-height:2px;transition:height .3s;}
+.bar-val{font-size:8px;color:var(--gray);font-weight:600;}
+.bar-lbl{font-size:8px;color:var(--sub);white-space:nowrap;}
 
-  .empty{text-align:center;padding:50px 20px;color:var(--sub);}
-  .empty .icon{font-size:44px;margin-bottom:12px;}
-  .empty p{font-size:14px;}
+/* EXPORT / IMPORT */
+.io-wrap{padding:14px;}
+.io-card{background:var(--white);border-radius:var(--r);padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:12px;}
+.io-card-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.io-card-sub{font-size:12px;color:var(--sub);margin-bottom:14px;line-height:1.5;}
+.io-btn{width:100%;padding:13px;font-size:14px;font-weight:600;border:none;border-radius:10px;cursor:pointer;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:6px;}
+.io-btn.primary{background:var(--navy);color:#fff;}
+.io-btn.teal{background:var(--teal);color:#fff;}
+.io-btn.green{background:var(--green);color:#fff;}
+.io-btn.outline-red{background:transparent;color:var(--red);border:1.5px solid var(--red);}
+.io-btn:active{opacity:.85;}
+.io-divider{height:1px;background:var(--border);margin:6px 0;}
+.drop-zone{border:2px dashed var(--border);border-radius:var(--r);padding:28px 20px;text-align:center;cursor:pointer;transition:border-color .2s;margin-top:8px;}
+.drop-zone.drag-over{border-color:var(--blue);background:#EFF6FF;}
+.drop-zone .dz-icon{font-size:32px;margin-bottom:8px;}
+.drop-zone p{font-size:13px;color:var(--gray);}
+.drop-zone strong{display:block;font-size:12px;color:var(--blue);margin-top:4px;}
+.io-result{margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;display:none;}
+.io-result.ok{background:#DCFCE7;color:var(--green);}
+.io-result.err{background:#FEE2E2;color:var(--red);}
+.record-count{font-size:12px;color:var(--sub);text-align:center;margin-top:8px;}
+
+/* SETTINGS */
+.settings-wrap{padding:14px;}
+.loc-list{background:var(--white);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:12px;}
+.loc-item{display:flex;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border);gap:10px;}
+.loc-item:last-child{border-bottom:none;}
+.loc-name{flex:1;font-size:14px;color:var(--text);}
+.loc-del{background:none;border:none;font-size:18px;color:var(--sub);cursor:pointer;padding:4px;}
+.loc-add-row{display:flex;gap:8px;}
+.loc-input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--text);outline:none;font-family:inherit;background:var(--white);}
+.loc-input:focus{border-color:var(--blue);}
+.loc-add-btn{padding:12px 16px;background:var(--blue);color:#fff;font-size:14px;font-weight:600;border:none;border-radius:10px;cursor:pointer;}
+
+.toast{position:fixed;bottom:calc(80px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:#1E293B;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;white-space:nowrap;z-index:999;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.empty{text-align:center;padding:40px 20px;color:var(--sub);}
+.empty .icon{font-size:40px;margin-bottom:10px;}
+.empty p{font-size:13px;}
 </style>
 </head>
 <body>
@@ -144,7 +193,7 @@
 <div class="topbar">
   <div>
     <div class="sub">CosX Solution</div>
-    <h1>通勤記錄</h1>
+    <h1>工作紀錄</h1>
   </div>
   <div class="stat-box">
     <div class="stat-num" id="topCount">0</div>
@@ -154,130 +203,248 @@
 
 <div class="page-content">
 
-  <!-- ADD -->
-  <div class="page active" id="page-add">
-    <div class="form-wrap">
-      <div class="section-label">通勤日期與方向</div>
-      <div class="card">
-        <div class="field">
-          <label>日期</label>
-          <input type="date" id="f-date">
+<!-- ══ ADD ══ -->
+<div class="page active" id="page-add">
+<div class="form-wrap">
+  <div class="section-label">日期與方向</div>
+  <div class="card">
+    <div class="field">
+      <label>日期</label>
+      <input type="date" id="f-date">
+    </div>
+    <div class="field">
+      <label>方向</label>
+      <select id="f-direction" onchange="onDirectionChange()">
+        <option value="上班">上班</option>
+        <option value="下班">下班</option>
+      </select>
+    </div>
+    <div class="field">
+      <label id="timeLabel">上班時間</label>
+      <div class="time-picker-wrap">
+        <div class="time-col">
+          <div class="time-label">時</div>
+          <div class="time-highlight">
+            <div class="time-scroll" id="hourScroll"></div>
+          </div>
         </div>
-        <div class="field">
-          <label>方向</label>
-          <select id="f-direction">
-            <option value="上班">上班</option>
-            <option value="下班">下班</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>出差地點</label>
-          <select id="f-location">
-            <option value="">（不選）</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="section-label">通勤方式</div>
-      <div class="mode-grid">
-        <div class="mode-btn" data-mode="hsr" onclick="selectMode('hsr')">
-          <div class="icon">🚄</div><div class="name">高鐵</div><div class="detail">需電子票據</div>
-        </div>
-        <div class="mode-btn" data-mode="hsr-taxi" onclick="selectMode('hsr-taxi')">
-          <div class="icon">🚄🚕</div><div class="name">高鐵＋計程車</div><div class="detail">需電子票據</div>
-        </div>
-        <div class="mode-btn" data-mode="car" onclick="selectMode('car')">
-          <div class="icon">🚗</div><div class="name">私家車</div><div class="detail">需加油發票</div>
-        </div>
-        <div class="mode-btn" data-mode="govt" onclick="selectMode('govt')">
-          <div class="icon">🚐</div><div class="name">公務車</div><div class="detail">無需報帳</div>
+        <div class="time-sep">:</div>
+        <div class="time-col">
+          <div class="time-label">分</div>
+          <div class="time-highlight">
+            <div class="time-scroll" id="minScroll"></div>
+          </div>
         </div>
       </div>
-
-      <div class="section-label">備註（選填）</div>
-      <div class="card">
-        <div class="field">
-          <textarea id="f-note" placeholder="例：加油金額、備注..."></textarea>
-        </div>
-      </div>
-      <button class="btn-submit" onclick="saveRecord()">✅ 儲存記錄</button>
+    </div>
+    <div class="field">
+      <label>出差地點</label>
+      <select id="f-location">
+        <option value="">（不選）</option>
+      </select>
     </div>
   </div>
 
-  <!-- CALENDAR -->
-  <div class="page" id="page-cal">
-    <div class="cal-wrap">
-      <div class="cal-nav">
-        <button class="arrow" onclick="changeCalMonth(-1)">◀</button>
-        <div class="month-title" id="calTitle"></div>
-        <button class="arrow" onclick="changeCalMonth(1)">▶</button>
-      </div>
-      <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#FFF3EE">🚄</div>高鐵</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#FFFBEB">🚕</div>高鐵+計程車</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#EFF6FF">🚗</div>私家車</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#F0FDF4">🚐</div>公務車</div>
-        <div class="legend-item" style="margin-left:4px">⬅上班 / 下班➡</div>
-      </div>
-      <div class="cal-grid">
-        <div class="cal-header">
-          <div class="cal-dow">日</div><div class="cal-dow">一</div><div class="cal-dow">二</div>
-          <div class="cal-dow">三</div><div class="cal-dow">四</div><div class="cal-dow">五</div>
-          <div class="cal-dow">六</div>
-        </div>
-        <div class="cal-days" id="calDays"></div>
-      </div>
+  <div class="section-label">通勤方式</div>
+  <div class="mode-grid">
+    <div class="mode-btn" data-mode="hsr" onclick="selectMode('hsr')">
+      <div class="icon">🚄</div><div class="name">高鐵</div><div class="detail">需電子票據</div>
+    </div>
+    <div class="mode-btn" data-mode="hsr-taxi" onclick="selectMode('hsr-taxi')">
+      <div class="icon">🚄🚕</div><div class="name">高鐵＋計程車</div><div class="detail">需電子票據</div>
+    </div>
+    <div class="mode-btn" data-mode="car" onclick="selectMode('car')">
+      <div class="icon">🚗</div><div class="name">私家車</div><div class="detail">需加油發票</div>
+    </div>
+    <div class="mode-btn" data-mode="govt" onclick="selectMode('govt')">
+      <div class="icon">🚐</div><div class="name">公務車</div><div class="detail">無需報帳</div>
+    </div>
+    <div class="mode-btn" data-mode="wfh" onclick="selectMode('wfh')">
+      <div class="icon">🏠</div><div class="name">居家辦公</div><div class="detail">WFH</div>
+    </div>
+    <div class="mode-btn" data-mode="holiday" onclick="selectMode('holiday')">
+      <div class="icon">🌴</div><div class="name">放假</div><div class="detail">休假日</div>
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="page" id="page-stats">
-    <div class="stats-wrap">
-      <div class="date-range-card">
-        <div class="date-range-title">篩選日期範圍</div>
-        <div class="date-row">
-          <label>從</label>
-          <input type="date" id="s-from" onchange="renderStats()">
-        </div>
-        <div class="date-row">
-          <label>到</label>
-          <input type="date" id="s-to" onchange="renderStats()">
-        </div>
-        <div class="quick-btns">
-          <div class="quick-btn" onclick="setQuick('thisMonth',this)">本月</div>
-          <div class="quick-btn" onclick="setQuick('lastMonth',this)">上個月</div>
-          <div class="quick-btn" onclick="setQuick('last30',this)">近30天</div>
-          <div class="quick-btn" onclick="setQuick('last90',this)">近90天</div>
-          <div class="quick-btn" onclick="setQuick('all',this)">全部</div>
-        </div>
-      </div>
-      <div class="stats-total">
-        <div class="stats-total-num" id="s-total">0</div>
-        <div class="stats-total-label" id="s-total-label">記錄總筆數</div>
-      </div>
-      <div class="mode-stat-card" id="s-breakdown"></div>
+  <div class="section-label">備註（選填）</div>
+  <div class="card">
+    <div class="field">
+      <textarea id="f-note" placeholder="例：加油金額、備注..."></textarea>
     </div>
   </div>
+  <button class="btn-submit" onclick="saveRecord()">✅ 儲存記錄</button>
+</div>
+</div>
 
-  <!-- SETTINGS -->
-  <div class="page" id="page-settings">
-    <div class="settings-wrap">
-      <div class="section-label">出差地點管理</div>
-      <div class="loc-list" id="locList"></div>
-      <div class="loc-add-row" style="margin-top:10px">
-        <input class="loc-input" id="locInput" placeholder="輸入新地點，例：台北、高雄" onkeydown="if(event.key==='Enter')addLocation()">
-        <button class="loc-add-btn" onclick="addLocation()">新增</button>
-      </div>
+<!-- ══ CALENDAR ══ -->
+<div class="page" id="page-cal">
+<div class="cal-wrap">
+  <div class="cal-nav">
+    <button class="arrow" onclick="changeCalMonth(-1)">◀</button>
+    <div class="month-title" id="calTitle"></div>
+    <button class="arrow" onclick="changeCalMonth(1)">▶</button>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#FFF3EE">🚄</div>高鐵</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#FFFBEB">🚕</div>高+計</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#EFF6FF">🚗</div>私家車</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#F0FDF4">🚐</div>公務車</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#F5F3FF">🏠</div>WFH</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#FDF2F8">🌴</div>放假</div>
+    <div class="legend-item" style="margin-left:2px;font-size:9px">⬅上班 下班➡</div>
+  </div>
+  <div class="cal-grid">
+    <div class="cal-header">
+      <div class="cal-dow">日</div><div class="cal-dow">一</div><div class="cal-dow">二</div>
+      <div class="cal-dow">三</div><div class="cal-dow">四</div><div class="cal-dow">五</div>
+      <div class="cal-dow">六</div>
     </div>
+    <div class="cal-days" id="calDays"></div>
+  </div>
+</div>
+</div>
+
+<!-- ══ COMMUTE STATS ══ -->
+<div class="page" id="page-stats">
+<div class="stats-wrap">
+  <div class="filter-card">
+    <div class="filter-title">通勤統計篩選</div>
+    <div class="date-row"><label>從</label><input type="date" id="cs-from" onchange="renderCommuteStats()"></div>
+    <div class="date-row"><label>到</label><input type="date" id="cs-to" onchange="renderCommuteStats()"></div>
+    <div class="date-row">
+      <label>地點</label>
+      <select id="cs-loc" onchange="renderCommuteStats()">
+        <option value="">全部地點</option>
+      </select>
+    </div>
+    <div class="quick-btns">
+      <div class="quick-btn" onclick="setQuick('cs','thisMonth',this)">本月</div>
+      <div class="quick-btn" onclick="setQuick('cs','lastMonth',this)">上月</div>
+      <div class="quick-btn" onclick="setQuick('cs','last30',this)">近30天</div>
+      <div class="quick-btn" onclick="setQuick('cs','last90',this)">近90天</div>
+      <div class="quick-btn" onclick="setQuick('cs','all',this)">全部</div>
+    </div>
+  </div>
+  <div class="summary-grid">
+    <div class="summary-card full">
+      <div class="summary-num" id="cs-total" style="color:var(--blue)">0</div>
+      <div class="summary-label" id="cs-label">記錄總筆數</div>
+    </div>
+  </div>
+  <div class="mode-stat-card">
+    <div class="mode-stat-title">各通勤方式次數</div>
+    <div id="cs-breakdown"></div>
+  </div>
+</div>
+</div>
+
+<!-- ══ HOURS STATS ══ -->
+<div class="page" id="page-hours">
+<div class="stats-wrap">
+  <div class="filter-card">
+    <div class="filter-title">工時統計篩選</div>
+    <div class="date-row"><label>從</label><input type="date" id="hs-from" onchange="renderHoursStats()"></div>
+    <div class="date-row"><label>到</label><input type="date" id="hs-to" onchange="renderHoursStats()"></div>
+    <div class="date-row">
+      <label>地點</label>
+      <select id="hs-loc" onchange="renderHoursStats()">
+        <option value="">全部地點</option>
+      </select>
+    </div>
+    <div class="quick-btns">
+      <div class="quick-btn" onclick="setQuick('hs','thisMonth',this)">本月</div>
+      <div class="quick-btn" onclick="setQuick('hs','lastMonth',this)">上月</div>
+      <div class="quick-btn" onclick="setQuick('hs','last30',this)">近30天</div>
+      <div class="quick-btn" onclick="setQuick('hs','last90',this)">近90天</div>
+      <div class="quick-btn" onclick="setQuick('hs','all',this)">全部</div>
+    </div>
+  </div>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-num" id="hs-days" style="color:var(--blue)">0</div>
+      <div class="summary-label">有記錄天數</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-num" id="hs-avg" style="color:var(--teal)">0h</div>
+      <div class="summary-label">平均工時/天</div>
+    </div>
+    <div class="summary-card full">
+      <div class="summary-num" id="hs-total" style="color:var(--amber)">0h</div>
+      <div class="summary-label" id="hs-label">總工時</div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">每日工時直條圖</div>
+    <div class="bar-chart" id="hoursChart"></div>
+  </div>
+</div>
+</div>
+
+<!-- ══ EXPORT / IMPORT ══ -->
+<div class="page" id="page-io">
+<div class="io-wrap">
+
+  <div class="section-label">匯出資料</div>
+
+  <div class="io-card">
+    <div class="io-card-title">📦 匯出備份檔（JSON）</div>
+    <div class="io-card-sub">包含所有記錄及地點設定，可在其他裝置匯入還原。建議定期備份。</div>
+    <div class="record-count" id="io-rec-count"></div>
+    <button class="io-btn primary" onclick="exportJSON()">⬇ 匯出備份 (.json)</button>
+  </div>
+
+  <div class="io-card">
+    <div class="io-card-title">📊 匯出 CSV 報表</div>
+    <div class="io-card-sub">匯出為試算表格式，可用 Excel 或 Numbers 開啟分析。</div>
+    <button class="io-btn teal" onclick="exportCSV('all')">⬇ 匯出全部記錄 (.csv)</button>
+    <button class="io-btn teal" style="margin-top:8px;background:#0891B2" onclick="exportCSV('month')">⬇ 匯出本月記錄 (.csv)</button>
+  </div>
+
+  <div class="section-label">匯入資料</div>
+
+  <div class="io-card">
+    <div class="io-card-title">📂 匯入備份檔（JSON）</div>
+    <div class="io-card-sub">選擇之前匯出的 .json 備份檔進行還原。<br>⚠️ 匯入會<strong style="color:var(--red)">合併</strong>現有資料，重複記錄會自動略過。</div>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('importFile').click()">
+      <div class="dz-icon">📁</div>
+      <p>點擊選擇備份檔案</p>
+      <strong>支援 .json 格式</strong>
+    </div>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
+    <div class="io-result" id="importResult"></div>
+  </div>
+
+  <div class="io-card">
+    <div class="io-card-title" style="color:var(--red)">⚠️ 危險操作</div>
+    <div class="io-card-sub">清除後無法復原，請務必先匯出備份。</div>
+    <button class="io-btn outline-red" onclick="clearAll()">🗑 清除所有記錄</button>
   </div>
 
 </div>
+</div>
+
+<!-- ══ SETTINGS ══ -->
+<div class="page" id="page-settings">
+<div class="settings-wrap">
+  <div class="section-label">出差地點管理</div>
+  <div class="loc-list" id="locList"></div>
+  <div class="loc-add-row" style="margin-top:10px">
+    <input class="loc-input" id="locInput" placeholder="輸入新地點，例：台北" onkeydown="if(event.key==='Enter')addLocation()">
+    <button class="loc-add-btn" onclick="addLocation()">新增</button>
+  </div>
+</div>
+</div>
+
+</div><!-- page-content -->
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
   <div class="nav-item active" id="nav-add" onclick="goPage('add')"><span class="ni">➕</span>新增</div>
   <div class="nav-item" id="nav-cal" onclick="goPage('cal')"><span class="ni">📅</span>行事曆</div>
-  <div class="nav-item" id="nav-stats" onclick="goPage('stats')"><span class="ni">📊</span>統計</div>
+  <div class="nav-item" id="nav-stats" onclick="goPage('stats')"><span class="ni">🚌</span>通勤</div>
+  <div class="nav-item" id="nav-hours" onclick="goPage('hours')"><span class="ni">⏱</span>工時</div>
+  <div class="nav-item" id="nav-io" onclick="goPage('io')"><span class="ni">📤</span>匯出入</div>
   <div class="nav-item" id="nav-settings" onclick="goPage('settings')"><span class="ni">📍</span>地點</div>
 </div>
 
@@ -295,280 +462,501 @@
 
 <script>
 const MODE_META = {
-  'hsr':      {label:'高鐵',        icon:'🚄',  bg:'#FFF3EE',cls:'hsr',     color:'#E8530A'},
-  'hsr-taxi': {label:'高鐵＋計程車', icon:'🚄🚕',bg:'#FFFBEB',cls:'hsr-taxi',color:'#D97706'},
-  'car':      {label:'私家車',       icon:'🚗',  bg:'#EFF6FF',cls:'car',     color:'#2563EB'},
-  'govt':     {label:'公務車',       icon:'🚐',  bg:'#F0FDF4',cls:'govt',    color:'#16A34A'},
+  'hsr':      {label:'高鐵',        icon:'🚄',  bg:'#FFF3EE',color:'#E8530A',commute:true},
+  'hsr-taxi': {label:'高鐵＋計程車', icon:'🚄🚕',bg:'#FFFBEB',color:'#D97706',commute:true},
+  'car':      {label:'私家車',       icon:'🚗',  bg:'#EFF6FF',color:'#2563EB',commute:true},
+  'govt':     {label:'公務車',       icon:'🚐',  bg:'#F0FDF4',color:'#16A34A',commute:true},
+  'wfh':      {label:'居家辦公',     icon:'🏠',  bg:'#F5F3FF',color:'#7C3AED',commute:false},
+  'holiday':  {label:'放假',         icon:'🌴',  bg:'#FDF2F8',color:'#DB2777',commute:false},
 };
 
-let records   = [];
-let locations = [];
-let currentMode = null;
-let calDate = new Date();
-let modalDateStr = null;
+let records=[], locations=[], currentMode=null, calDate=new Date(), modalDateStr=null;
 
 // ── INIT ──
-function init() {
-  const r = localStorage.getItem('commute-v3');
-  const l = localStorage.getItem('commute-locs');
-  if (r) records   = JSON.parse(r);
-  if (l) locations = JSON.parse(l);
+function init(){
+  const r=localStorage.getItem('commute-v4');
+  const l=localStorage.getItem('commute-locs');
+  if(r) records=JSON.parse(r);
+  if(l) locations=JSON.parse(l);
 
-  const today = new Date();
-  document.getElementById('f-date').value = today.toISOString().slice(0,10);
-  calDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  const today=new Date();
+  document.getElementById('f-date').value=today.toISOString().slice(0,10);
+  calDate=new Date(today.getFullYear(),today.getMonth(),1);
 
+  initTimePicker();
   refreshLocationSelects();
   updateTopCount();
   renderCal();
-  setQuick('thisMonth', null);
+  setQuick('cs','thisMonth',null);
+  setQuick('hs','thisMonth',null);
 }
 
-function saveData() { localStorage.setItem('commute-v3', JSON.stringify(records)); updateTopCount(); }
-function saveLocs()  { localStorage.setItem('commute-locs', JSON.stringify(locations)); }
+function saveData(){localStorage.setItem('commute-v4',JSON.stringify(records));updateTopCount();}
+function saveLocs(){localStorage.setItem('commute-locs',JSON.stringify(locations));}
 
-function updateTopCount() {
-  const m = new Date();
-  const n = records.filter(r => {
-    const d = new Date(r.date);
-    return d.getFullYear()===m.getFullYear() && d.getMonth()===m.getMonth();
+function updateTopCount(){
+  const m=new Date();
+  document.getElementById('topCount').textContent=records.filter(r=>{
+    const d=new Date(r.date);
+    return d.getFullYear()===m.getFullYear()&&d.getMonth()===m.getMonth();
   }).length;
-  document.getElementById('topCount').textContent = n;
 }
 
 // ── NAV ──
-function goPage(name) {
+function goPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   document.getElementById('nav-'+name).classList.add('active');
-  if (name==='cal') renderCal();
-  if (name==='stats') renderStats();
-  if (name==='settings') renderLocList();
+  if(name==='cal') renderCal();
+  if(name==='stats'){refreshFilterSelects();renderCommuteStats();}
+  if(name==='hours'){refreshFilterSelects();renderHoursStats();}
+  if(name==='settings') renderLocList();
+  if(name==='io') goPage_io_refresh();
+}
+
+// ── TIME PICKER ──
+const HOURS=[...Array(24)].map((_,i)=>String(i).padStart(2,'0'));
+const MINS=['00','15','30','45'];
+
+function initTimePicker(){
+  const hs=document.getElementById('hourScroll');
+  const ms=document.getElementById('minScroll');
+  // padding items for snap
+  const pad='<div class="time-item" style="opacity:0">--</div><div class="time-item" style="opacity:0">--</div>';
+  hs.innerHTML=pad+HOURS.map(h=>`<div class="time-item">${h}</div>`).join('')+pad;
+  ms.innerHTML=pad+MINS.map(m=>`<div class="time-item">${m}</div>`).join('')+pad;
+
+  // set default to current time rounded to 15min
+  const now=new Date();
+  const h=now.getHours();
+  const rawMin=now.getMinutes();
+  const mIdx=Math.round(rawMin/15)%4;
+  setTimeout(()=>{
+    hs.scrollTop=(h+2)*40; // +2 for padding items
+    ms.scrollTop=(mIdx+2)*40;
+    highlightVisible(hs);
+    highlightVisible(ms);
+  },100);
+
+  hs.addEventListener('scroll',()=>highlightVisible(hs),{passive:true});
+  ms.addEventListener('scroll',()=>highlightVisible(ms),{passive:true});
+}
+
+function highlightVisible(el){
+  const mid=el.scrollTop+el.offsetHeight/2;
+  el.querySelectorAll('.time-item').forEach(item=>{
+    const top=item.offsetTop;
+    item.classList.toggle('selected',Math.abs(top+20-mid)<22);
+  });
+}
+
+function getPickedTime(){
+  const hs=document.getElementById('hourScroll');
+  const ms=document.getElementById('minScroll');
+  const hIdx=Math.round(hs.scrollTop/40);
+  const mIdx=Math.round(ms.scrollTop/40);
+  const h=HOURS[Math.max(0,Math.min(hIdx-2,23))];
+  const m=MINS[Math.max(0,Math.min(mIdx-2,3))];
+  return `${h}:${m}`;
+}
+
+function onDirectionChange(){
+  const dir=document.getElementById('f-direction').value;
+  document.getElementById('timeLabel').textContent=dir==='上班'?'上班時間':'下班時間';
 }
 
 // ── MODE ──
-function selectMode(mode) {
-  currentMode = mode;
-  document.querySelectorAll('.mode-btn').forEach(b => {
+function selectMode(mode){
+  currentMode=mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>{
     b.className='mode-btn';
-    if (b.dataset.mode===mode) b.classList.add('sel-'+mode);
+    if(b.dataset.mode===mode) b.classList.add('sel-'+mode);
   });
 }
 
 // ── LOCATIONS ──
-function refreshLocationSelects() {
-  const sel = document.getElementById('f-location');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">（不選）</option>';
-  locations.forEach(l => {
-    const o = document.createElement('option');
-    o.value = l; o.textContent = l;
-    sel.appendChild(o);
+function refreshLocationSelects(){
+  ['f-location','cs-loc','hs-loc'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel) return;
+    const cur=sel.value;
+    const isFilter=(id!=='f-location');
+    sel.innerHTML=isFilter?'<option value="">全部地點</option>':'<option value="">（不選）</option>';
+    locations.forEach(l=>{
+      const o=document.createElement('option');
+      o.value=l;o.textContent=l;sel.appendChild(o);
+    });
+    if(cur) sel.value=cur;
   });
-  if (cur) sel.value = cur;
 }
+function refreshFilterSelects(){refreshLocationSelects();}
 
-function renderLocList() {
-  const el = document.getElementById('locList');
-  if (!locations.length) {
-    el.innerHTML = '<div class="empty" style="padding:24px"><p>尚未新增任何地點</p></div>';
-    return;
-  }
-  el.innerHTML = locations.map((l,i) =>
-    `<div class="loc-item">
-      <span class="loc-name">📍 ${l}</span>
-      <button class="loc-del" onclick="deleteLocation(${i})">🗑</button>
-    </div>`
+function renderLocList(){
+  const el=document.getElementById('locList');
+  if(!locations.length){el.innerHTML='<div class="empty"><p>尚未新增任何地點</p></div>';return;}
+  el.innerHTML=locations.map((l,i)=>
+    `<div class="loc-item"><span class="loc-name">📍 ${l}</span>
+     <button class="loc-del" onclick="deleteLocation(${i})">🗑</button></div>`
   ).join('');
 }
 
-function addLocation() {
-  const input = document.getElementById('locInput');
-  const val = input.value.trim();
-  if (!val) return;
-  if (locations.includes(val)) { showToast('地點已存在'); return; }
+function addLocation(){
+  const input=document.getElementById('locInput');
+  const val=input.value.trim();
+  if(!val){return;}
+  if(locations.includes(val)){showToast('地點已存在');return;}
   locations.push(val);
-  saveLocs(); refreshLocationSelects(); renderLocList();
-  input.value = '';
+  saveLocs();refreshLocationSelects();renderLocList();
+  input.value='';
   showToast('✅ 已新增「'+val+'」');
 }
 
-function deleteLocation(i) {
-  if (!confirm(`確定刪除「${locations[i]}」？`)) return;
+function deleteLocation(i){
+  if(!confirm(`確定刪除「${locations[i]}」？`)) return;
   locations.splice(i,1);
-  saveLocs(); refreshLocationSelects(); renderLocList();
+  saveLocs();refreshLocationSelects();renderLocList();
 }
 
-// ── SAVE RECORD ──
-function saveRecord() {
-  const date      = document.getElementById('f-date').value;
-  const direction = document.getElementById('f-direction').value;
-  const location  = document.getElementById('f-location').value;
-  const note      = document.getElementById('f-note').value.trim();
-  if (!date)        { showToast('請選擇日期'); return; }
-  if (!currentMode) { showToast('請選擇通勤方式'); return; }
-  records.unshift({id:Date.now(), date, direction, mode:currentMode, location, note});
+// ── SAVE ──
+function saveRecord(){
+  const date=document.getElementById('f-date').value;
+  const direction=document.getElementById('f-direction').value;
+  const location=document.getElementById('f-location').value;
+  const note=document.getElementById('f-note').value.trim();
+  const time=getPickedTime();
+  if(!date){showToast('請選擇日期');return;}
+  if(!currentMode){showToast('請選擇通勤方式');return;}
+  records.unshift({id:Date.now(),date,direction,mode:currentMode,location,note,time});
   saveData();
-  currentMode = null;
+  currentMode=null;
   document.querySelectorAll('.mode-btn').forEach(b=>b.className='mode-btn');
-  document.getElementById('f-note').value = '';
-  document.getElementById('f-location').value = '';
+  document.getElementById('f-note').value='';
+  document.getElementById('f-location').value='';
   showToast('✅ 記錄已儲存');
-  setTimeout(()=>goPage('cal'), 700);
 }
 
 // ── CALENDAR ──
-function changeCalMonth(d) { calDate.setMonth(calDate.getMonth()+d); renderCal(); }
+function changeCalMonth(d){calDate.setMonth(calDate.getMonth()+d);renderCal();}
 
-function renderCal() {
-  const y = calDate.getFullYear(), m = calDate.getMonth();
-  document.getElementById('calTitle').textContent = `${y} 年 ${m+1} 月`;
-  const first = new Date(y,m,1).getDay();
-  const days  = new Date(y,m+1,0).getDate();
-  const todayStr = new Date().toISOString().slice(0,10);
+function calcDayHours(dateStr){
+  const go=records.find(r=>r.date===dateStr&&r.direction==='上班'&&r.time);
+  const bk=records.find(r=>r.date===dateStr&&r.direction==='下班'&&r.time);
+  if(!go||!bk) return null;
+  const [gh,gm]=go.time.split(':').map(Number);
+  const [bh,bm]=bk.time.split(':').map(Number);
+  const diff=(bh*60+bm)-(gh*60+gm);
+  if(diff<=0) return null;
+  const h=Math.floor(diff/60),m=diff%60;
+  return m>0?`${h}h${m}m`:`${h}h`;
+}
 
-  // map: date → {go: record, back: record}
-  const map = {};
-  records.forEach(r => {
-    const d = new Date(r.date);
-    if (d.getFullYear()===y && d.getMonth()===m) {
-      if (!map[r.date]) map[r.date] = {go:[], back:[]};
-      if (r.direction==='上班') map[r.date].go.push(r);
+function renderCal(){
+  const y=calDate.getFullYear(),m=calDate.getMonth();
+  document.getElementById('calTitle').textContent=`${y} 年 ${m+1} 月`;
+  const first=new Date(y,m,1).getDay();
+  const days=new Date(y,m+1,0).getDate();
+  const todayStr=new Date().toISOString().slice(0,10);
+
+  const map={};
+  records.forEach(r=>{
+    const d=new Date(r.date);
+    if(d.getFullYear()===y&&d.getMonth()===m){
+      if(!map[r.date]) map[r.date]={go:[],back:[]};
+      if(r.direction==='上班') map[r.date].go.push(r);
       else map[r.date].back.push(r);
     }
   });
 
-  let html = '';
-  for (let i=0;i<first;i++) html+=`<div class="cal-day empty"></div>`;
-  for (let d=1;d<=days;d++) {
-    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dow = (first+d-1)%7;
-    const cls = ['cal-day', ds===todayStr?'today':'', dow===0?'sunday':'', dow===6?'saturday':''].filter(Boolean).join(' ');
-    const dayData = map[ds] || {go:[], back:[]};
-
-    // up to 2 rows (in case multiple records same day same direction)
-    const maxRows = Math.max(dayData.go.length, dayData.back.length, 1);
-    let rows = '';
-    for (let ri=0; ri<Math.min(maxRows,2); ri++) {
-      const goR  = dayData.go[ri];
-      const bkR  = dayData.back[ri];
-      const goHtml  = goR  ? `<div class="day-dot" style="background:${MODE_META[goR.mode].bg}">${MODE_META[goR.mode].icon}</div>` : `<div class="day-dot empty-slot"></div>`;
-      const bkHtml  = bkR  ? `<div class="day-dot" style="background:${MODE_META[bkR.mode].bg}">${MODE_META[bkR.mode].icon}</div>` : `<div class="day-dot empty-slot"></div>`;
-      rows += `<div class="day-row">${goHtml}${bkHtml}</div>`;
+  let html='';
+  for(let i=0;i<first;i++) html+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dow=(first+d-1)%7;
+    const cls=['cal-day',ds===todayStr?'today':'',dow===0?'sunday':'',dow===6?'saturday':''].filter(Boolean).join(' ');
+    const dayData=map[ds]||{go:[],back:[]};
+    const maxR=Math.max(dayData.go.length,dayData.back.length,1);
+    let rows='';
+    for(let ri=0;ri<Math.min(maxR,2);ri++){
+      const goR=dayData.go[ri],bkR=dayData.back[ri];
+      const goH=goR?`<div class="day-dot" style="background:${MODE_META[goR.mode].bg}">${MODE_META[goR.mode].icon}</div>`:`<div class="day-dot empty-slot"></div>`;
+      const bkH=bkR?`<div class="day-dot" style="background:${MODE_META[bkR.mode].bg}">${MODE_META[bkR.mode].icon}</div>`:`<div class="day-dot empty-slot"></div>`;
+      rows+=`<div class="day-row">${goH}${bkH}</div>`;
     }
+    // location & hours
+    const locs=[...new Set([...dayData.go,...dayData.back].filter(r=>r.location).map(r=>r.location))];
+    const hrs=calcDayHours(ds);
+    const locStr=locs.length?`<div class="day-loc">📍${locs[0]}</div>`:'';
+    const hrsStr=hrs?`<div class="day-hours">⏱${hrs}</div>`:'';
 
-    html += `<div class="${cls}" onclick="openDayModal('${ds}')">
-      <div class="day-num">${d}</div>${rows}
+    html+=`<div class="${cls}" onclick="openDayModal('${ds}')">
+      <div class="day-num">${d}</div>${rows}${locStr}${hrsStr}
     </div>`;
   }
-  document.getElementById('calDays').innerHTML = html;
+  document.getElementById('calDays').innerHTML=html;
 }
 
 // ── DAY MODAL ──
-function openDayModal(dateStr) {
-  modalDateStr = dateStr;
-  const d = new Date(dateStr);
-  const weekDay = ['日','一','二','三','四','五','六'][d.getDay()];
-  document.getElementById('modalDate').textContent = `${dateStr.replace(/-/g,'/')}（${weekDay}）`;
-  const recs = records.filter(r=>r.date===dateStr);
-  let html = '';
-  if (!recs.length) {
-    html = `<div class="modal-empty">這天還沒有記錄</div>`;
+function openDayModal(dateStr){
+  modalDateStr=dateStr;
+  const d=new Date(dateStr);
+  const wd=['日','一','二','三','四','五','六'][d.getDay()];
+  document.getElementById('modalDate').textContent=`${dateStr.replace(/-/g,'/')}（${wd}）`;
+  const recs=records.filter(r=>r.date===dateStr).sort((a,b)=>a.direction==='上班'?-1:1);
+  let html='';
+  if(!recs.length){
+    html=`<div class="modal-empty">這天還沒有記錄</div>`;
   } else {
-    // sort: 上班 first
-    const sorted = [...recs].sort((a,b)=>a.direction==='上班'?-1:1);
-    html = sorted.map(r => {
-      const meta = MODE_META[r.mode];
-      const locStr = r.location ? ` · 📍${r.location}` : '';
-      const noteStr = r.note ? ` · ${r.note}` : '';
+    html=recs.map(r=>{
+      const meta=MODE_META[r.mode];
+      const parts=[];
+      if(r.time) parts.push(`⏰ ${r.time}`);
+      if(r.location) parts.push(`📍 ${r.location}`);
+      if(r.note) parts.push(`📝 ${r.note}`);
       return `<div class="modal-rec">
         <div class="m-icon">${meta.icon}</div>
         <div class="m-info">
           <div class="m-mode">${r.direction}　${meta.label}</div>
-          <div class="m-sub">${locStr}${noteStr}</div>
+          ${parts.length?`<div class="m-sub">${parts.join('　')}</div>`:''}
         </div>
         <button class="modal-del" onclick="deleteFromModal(${r.id})">🗑</button>
       </div>`;
     }).join('');
+    const hrs=calcDayHours(dateStr);
+    if(hrs) html+=`<div style="text-align:center;padding:10px;font-size:13px;color:var(--amber);font-weight:700">⏱ 本日工時：${hrs}</div>`;
   }
-  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalContent').innerHTML=html;
   document.getElementById('modalBg').classList.add('open');
 }
 
-function closeModal(e) {
-  if (e.target===document.getElementById('modalBg'))
-    document.getElementById('modalBg').classList.remove('open');
-}
+function closeModal(e){if(e.target===document.getElementById('modalBg'))document.getElementById('modalBg').classList.remove('open');}
 
-function deleteFromModal(id) {
-  if (!confirm('確定刪除？')) return;
-  records = records.filter(r=>r.id!==id);
-  saveData(); openDayModal(modalDateStr); renderCal();
+function deleteFromModal(id){
+  if(!confirm('確定刪除？')) return;
+  records=records.filter(r=>r.id!==id);
+  saveData();openDayModal(modalDateStr);renderCal();
   showToast('已刪除');
 }
 
-function addFromModal() {
+function addFromModal(){
   document.getElementById('modalBg').classList.remove('open');
-  document.getElementById('f-date').value = modalDateStr;
+  document.getElementById('f-date').value=modalDateStr;
   goPage('add');
 }
 
-// ── STATS ──
-function setQuick(type, el) {
-  document.querySelectorAll('.quick-btn').forEach(b=>b.classList.remove('active'));
-  if (el) el.classList.add('active');
-  const today = new Date();
-  let from, to;
-  to = today.toISOString().slice(0,10);
-  if (type==='thisMonth') {
-    from = new Date(today.getFullYear(),today.getMonth(),1).toISOString().slice(0,10);
-  } else if (type==='lastMonth') {
-    const lm = new Date(today.getFullYear(),today.getMonth()-1,1);
-    from = lm.toISOString().slice(0,10);
-    to = new Date(today.getFullYear(),today.getMonth(),0).toISOString().slice(0,10);
-  } else if (type==='last30') {
-    from = new Date(today-30*864e5).toISOString().slice(0,10);
-  } else if (type==='last90') {
-    from = new Date(today-90*864e5).toISOString().slice(0,10);
-  } else {
-    from = records.length ? [...records].sort((a,b)=>a.date>b.date?1:-1)[0].date : to;
+// ── QUICK DATE ──
+function setQuick(prefix,type,el){
+  document.querySelectorAll('.quick-btn').forEach(b=>{
+    // only reset buttons in the same section
+    if(b.closest('#page-'+( prefix==='cs'?'stats':'hours'))) b.classList.remove('active');
+  });
+  if(el) el.classList.add('active');
+  const today=new Date();
+  let from,to=today.toISOString().slice(0,10);
+  if(type==='thisMonth') from=new Date(today.getFullYear(),today.getMonth(),1).toISOString().slice(0,10);
+  else if(type==='lastMonth'){
+    from=new Date(today.getFullYear(),today.getMonth()-1,1).toISOString().slice(0,10);
+    to=new Date(today.getFullYear(),today.getMonth(),0).toISOString().slice(0,10);
+  } else if(type==='last30') from=new Date(today-30*864e5).toISOString().slice(0,10);
+  else if(type==='last90') from=new Date(today-90*864e5).toISOString().slice(0,10);
+  else from=records.length?[...records].sort((a,b)=>a.date>b.date?1:-1)[0].date:to;
+  document.getElementById(prefix+'-from').value=from;
+  document.getElementById(prefix+'-to').value=to;
+  if(prefix==='cs') renderCommuteStats();
+  else renderHoursStats();
+}
+
+// ── COMMUTE STATS ──
+function renderCommuteStats(){
+  const from=document.getElementById('cs-from').value;
+  const to=document.getElementById('cs-to').value;
+  const loc=document.getElementById('cs-loc').value;
+  if(!from||!to) return;
+  let data=records.filter(r=>r.date>=from&&r.date<=to);
+  if(loc) data=data.filter(r=>r.location===loc);
+  document.getElementById('cs-total').textContent=data.length;
+  document.getElementById('cs-label').textContent=`${from.replace(/-/g,'/')} ～ ${to.replace(/-/g,'/')}　共 ${data.length} 筆`;
+  const max=Math.max(...Object.keys(MODE_META).map(k=>data.filter(r=>r.mode===k).length),1);
+  document.getElementById('cs-breakdown').innerHTML=Object.entries(MODE_META).map(([k,meta])=>{
+    const cnt=data.filter(r=>r.mode===k).length;
+    const pct=Math.round(cnt/max*100);
+    return `<div class="mode-stat-row">
+      <div class="mode-stat-icon">${meta.icon}</div>
+      <div class="mode-stat-info">
+        <div class="mode-stat-label">${meta.label}</div>
+        <div class="mode-stat-bar"><div class="mode-stat-fill" style="width:${pct}%;background:${meta.color}"></div></div>
+      </div>
+      <div class="mode-stat-count" style="color:${meta.color}">${cnt}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── HOURS STATS ──
+function renderHoursStats(){
+  const from=document.getElementById('hs-from').value;
+  const to=document.getElementById('hs-to').value;
+  const loc=document.getElementById('hs-loc').value;
+  if(!from||!to) return;
+
+  // collect dates in range
+  const dates=[];
+  const cur=new Date(from);
+  const end=new Date(to);
+  while(cur<=end){dates.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}
+
+  // per date hours
+  const dayHours=[];
+  dates.forEach(ds=>{
+    let dayRecs=records.filter(r=>r.date===ds);
+    if(loc) dayRecs=dayRecs.filter(r=>r.location===loc);
+    const go=dayRecs.find(r=>r.direction==='上班'&&r.time);
+    const bk=dayRecs.find(r=>r.direction==='下班'&&r.time);
+    if(go&&bk){
+      const [gh,gm]=go.time.split(':').map(Number);
+      const [bh,bm]=bk.time.split(':').map(Number);
+      const diff=(bh*60+bm)-(gh*60+gm);
+      if(diff>0) dayHours.push({date:ds,mins:diff});
+    }
+  });
+
+  const totalMins=dayHours.reduce((a,d)=>a+d.mins,0);
+  const avgMins=dayHours.length?Math.round(totalMins/dayHours.length):0;
+  const fmtH=mins=>{const h=Math.floor(mins/60),m=mins%60;return m?`${h}h${m}m`:`${h}h`;};
+
+  document.getElementById('hs-days').textContent=dayHours.length;
+  document.getElementById('hs-avg').textContent=avgMins?fmtH(avgMins):'0h';
+  document.getElementById('hs-total').textContent=totalMins?fmtH(totalMins):'0h';
+  document.getElementById('hs-label').textContent=`${from.replace(/-/g,'/')} ～ ${to.replace(/-/g,'/')} 總工時`;
+
+  // bar chart — show all dates with data, up to 60
+  const chartData=dayHours.slice(-60);
+  const maxM=Math.max(...chartData.map(d=>d.mins),1);
+  const chart=document.getElementById('hoursChart');
+  if(!chartData.length){
+    chart.innerHTML='<div class="empty" style="width:100%"><div class="icon">📊</div><p>無工時資料</p></div>';
+    return;
   }
-  document.getElementById('s-from').value = from;
-  document.getElementById('s-to').value   = to;
-  renderStats();
+  chart.innerHTML=chartData.map(d=>{
+    const pct=Math.round(d.mins/maxM*120);
+    const lbl=d.date.slice(5).replace('-','/');
+    const val=fmtH(d.mins);
+    return `<div class="bar-col">
+      <div class="bar-val">${val}</div>
+      <div class="bar-fill" style="height:${pct}px;background:var(--blue)"></div>
+      <div class="bar-lbl">${lbl}</div>
+    </div>`;
+  }).join('');
 }
 
-function renderStats() {
-  const from = document.getElementById('s-from').value;
-  const to   = document.getElementById('s-to').value;
-  if (!from||!to) return;
-
-  const filtered = records.filter(r => r.date>=from && r.date<=to);
-  document.getElementById('s-total').textContent = filtered.length;
-  document.getElementById('s-total-label').textContent =
-    `${from.replace(/-/g,'/')} ～ ${to.replace(/-/g,'/')} 共 ${filtered.length} 筆`;
-
-  const max = Math.max(...Object.keys(MODE_META).map(k=>filtered.filter(r=>r.mode===k).length), 1);
-  document.getElementById('s-breakdown').innerHTML =
-    Object.entries(MODE_META).map(([k,meta]) => {
-      const cnt = filtered.filter(r=>r.mode===k).length;
-      const pct = Math.round(cnt/max*100);
-      return `<div class="mode-stat-row">
-        <div class="mode-stat-icon">${meta.icon}</div>
-        <div class="mode-stat-info">
-          <div class="mode-stat-label">${meta.label}</div>
-          <div class="mode-stat-bar"><div class="mode-stat-fill" style="width:${pct}%;background:${meta.color}"></div></div>
-        </div>
-        <div class="mode-stat-count" style="color:${meta.color}">${cnt}</div>
-      </div>`;
-    }).join('');
+// ── EXPORT / IMPORT ──
+function goPage_io_refresh(){
+  document.getElementById('io-rec-count').textContent=`目前共 ${records.length} 筆記錄 / ${locations.length} 個地點`;
 }
 
-// ── TOAST ──
-function showToast(msg) {
+function exportJSON(){
+  if(!records.length&&!locations.length){showToast('沒有資料可匯出');return;}
+  const data={version:1,exportedAt:new Date().toISOString(),records,locations};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const date=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  a.href=url;a.download=`工作紀錄備份_${date}.json`;a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ 備份檔已匯出');
+}
+
+function exportCSV(type){
+  let data=[...records].sort((a,b)=>a.date>b.date?1:-1);
+  if(type==='month'){
+    const m=new Date();
+    data=data.filter(r=>{
+      const d=new Date(r.date);
+      return d.getFullYear()===m.getFullYear()&&d.getMonth()===m.getMonth();
+    });
+  }
+  if(!data.length){showToast('沒有記錄可匯出');return;}
+  const headers=['日期','方向','通勤方式','時間','出差地點','備註','需報帳'];
+  const rows=data.map(r=>{
+    const meta=MODE_META[r.mode];
+    return[r.date,r.direction,meta.label,r.time||'',r.location||'',r.note||'',meta.commute?'是':'否']
+      .map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',');
+  });
+  const csv='\uFEFF'+[headers.join(','),...rows].join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const date=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const fn=type==='month'?`通勤記錄_本月_${date}.csv`:`通勤記錄_全部_${date}.csv`;
+  a.href=url;a.download=fn;a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ CSV 已匯出');
+}
+
+function importJSON(input){
+  const file=input.files[0];
+  if(!file) return;
+  const result=document.getElementById('importResult');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.records||!Array.isArray(data.records)) throw new Error('格式錯誤');
+
+      // merge records (skip duplicate ids)
+      const existingIds=new Set(records.map(r=>r.id));
+      const newRecs=data.records.filter(r=>!existingIds.has(r.id));
+
+      // merge locations
+      const newLocs=(data.locations||[]).filter(l=>!locations.includes(l));
+
+      records=[...records,...newRecs].sort((a,b)=>new Date(b.date)-new Date(a.date));
+      locations=[...locations,...newLocs];
+
+      saveData();saveLocs();
+      refreshLocationSelects();
+      goPage_io_refresh();
+      renderCal();
+
+      result.style.display='block';
+      result.className='io-result ok';
+      result.textContent=`✅ 匯入成功！新增 ${newRecs.length} 筆記錄、${newLocs.length} 個地點`;
+    } catch(err){
+      result.style.display='block';
+      result.className='io-result err';
+      result.textContent='❌ 匯入失敗：檔案格式不正確，請選擇正確的備份檔';
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function clearAll(){
+  if(!confirm('確定要清除所有記錄嗎？\n此操作無法復原，請先匯出備份！')) return;
+  records=[];saveData();renderCal();
+  goPage_io_refresh();
+  showToast('已清除所有記錄');
+}
+
+// drag & drop
+document.addEventListener('DOMContentLoaded',()=>{
+  const dz=document.getElementById('dropZone');
+  if(!dz) return;
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+  dz.addEventListener('drop',e=>{
+    e.preventDefault();dz.classList.remove('drag-over');
+    const file=e.dataTransfer.files[0];
+    if(file){
+      const dt=new DataTransfer();dt.items.add(file);
+      const inp=document.getElementById('importFile');
+      inp.files=dt.files;importJSON(inp);
+    }
+  });
+});
+
+function showToast(msg){
   const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
+  t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2200);
 }
 
